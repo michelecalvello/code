@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcolatore di Probabilità: Dadi Personalizzati</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-bar {
+            transition: height 0.3s ease-in-out;
+        }
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-6xl bg-white rounded-2xl shadow-lg p-6 md:p-8 space-y-8">
+        
+        <!-- Header -->
+        <div class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Calcolatore di Probabilità</h1>
+            <p class="text-gray-500 mt-2">Per un numero variabile di dadi identici con facce e valori personalizzati.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Left Column: Configuration -->
+            <div>
+                <div class="border border-gray-200 rounded-lg p-6 h-full">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">1. Configura i tuoi Dadi</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                         <div>
+                            <label for="num-dice" class="font-medium text-gray-700">Numero di dadi:</label>
+                            <select id="num-dice" class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="2">2</option>
+                                <option value="3" selected>3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="num-faces" class="font-medium text-gray-700">Facce per dado:</label>
+                            <select id="num-faces" class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="6">6</option>
+                                <option value="8">8</option>
+                                <option value="10">10</option>
+                                <option value="12" selected>12</option>
+                                <option value="20">20</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="num-values" class="font-medium text-gray-700">Valori (1-10):</label>
+                            <input type="number" id="num-values" class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" min="1" max="10" value="5">
+                        </div>
+                    </div>
+                    
+                    <p class="text-sm text-gray-600 mb-4">Definisci quante delle <span id="num-faces-text" class="font-bold">12</span> facce mostrano ciascun valore. Il totale deve essere <span id="num-faces-total" class="font-bold">12</span>.</p>
+                    <div id="dice-config" class="space-y-3">
+                        <!-- Inputs will be generated here by JS -->
+                    </div>
+                    <div id="faces-total-feedback" class="mt-4 text-center font-medium p-2 rounded-md"></div>
+                </div>
+            </div>
+
+            <!-- Right Column: Calculation & Results -->
+            <div class="space-y-6">
+                <div class="border border-gray-200 rounded-lg p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">2. Imposta il Bersaglio</h2>
+                    <div class="mb-4">
+                        <label for="calculation-type" class="font-medium text-gray-700">Tipo di Calcolo:</label>
+                        <select id="calculation-type" class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="product" selected>Prodotto</option>
+                            <option value="sum">Somma</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2">
+                         <select id="comparison-type" class="col-span-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            <option value="less-than">Minore di</option>
+                            <option value="equal" selected>Esattamente</option>
+                        </select>
+                        <input type="number" id="target-input" min="1" value="24" class="col-span-2 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+                    <button id="calculate-btn" class="w-full mt-4 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        <span id="calculate-btn-text">Calcola</span>
+                        <div id="calculate-loader" class="loader hidden"></div>
+                    </button>
+                </div>
+
+                <div id="result-display" class="border border-gray-200 rounded-lg p-6 hidden">
+                     <h2 class="text-xl font-semibold mb-4 text-gray-800">3. Risultato Probabilità</h2>
+                    <div class="text-center bg-gray-50 p-6 rounded-lg">
+                        <p class="text-lg text-gray-600">La probabilità di ottenere una <span id="result-calc-type-text"></span> <span id="result-comparison-text">di</span> <span id="result-target-value" class="font-bold text-blue-600"></span> è:</p>
+                        <p id="result-probability" class="text-3xl md:text-4xl font-bold text-gray-900 my-2"></p>
+                        <p id="result-details" class="text-gray-500"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row: Distribution Chart -->
+        <div class="border border-gray-200 rounded-lg p-6 flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="chart-title" class="text-xl font-semibold text-gray-800">Distribuzione del Prodotto</h2>
+                <button id="toggle-chart-btn" class="hidden bg-gray-200 text-gray-800 font-semibold py-1 px-3 rounded-lg hover:bg-gray-300 transition text-sm">Mostra Cumulativa</button>
+            </div>
+            <div class="overflow-x-auto w-full pb-2">
+                <div id="distribution-chart" class="flex items-end justify-start gap-2 md:gap-3 px-2 border-t pt-4 min-h-[17rem]">
+                    <!-- Chart bars will be generated here -->
+                </div>
+            </div>
+             <p id="chart-placeholder" class="text-center text-gray-500 flex-grow flex items-center justify-center">Configura i tuoi dadi e clicca "Calcola" per vedere la distribuzione.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Configuration DOM Elements
+            const numDiceSelect = document.getElementById('num-dice');
+            const numFacesSelect = document.getElementById('num-faces');
+            const numValuesInput = document.getElementById('num-values');
+            const diceConfigContainer = document.getElementById('dice-config');
+            const facesTotalFeedback = document.getElementById('faces-total-feedback');
+            const numFacesText = document.getElementById('num-faces-text');
+            const numFacesTotal = document.getElementById('num-faces-total');
+
+            // Target & Calculation DOM Elements
+            const calculationTypeSelect = document.getElementById('calculation-type');
+            const comparisonType = document.getElementById('comparison-type');
+            const targetInput = document.getElementById('target-input');
+            const calculateBtn = document.getElementById('calculate-btn');
+            const calculateBtnText = document.getElementById('calculate-btn-text');
+            const calculateLoader = document.getElementById('calculate-loader');
+
+            // Result DOM Elements
+            const resultDisplay = document.getElementById('result-display');
+            const resultCalcTypeText = document.getElementById('result-calc-type-text');
+            const resultTargetValue = document.getElementById('result-target-value');
+            const resultComparisonText = document.getElementById('result-comparison-text');
+            const resultProbability = document.getElementById('result-probability');
+            const resultDetails = document.getElementById('result-details');
+
+            // Chart DOM Elements
+            const distributionChart = document.getElementById('distribution-chart');
+            const chartPlaceholder = document.getElementById('chart-placeholder');
+            const chartTitle = document.getElementById('chart-title');
+            const toggleChartBtn = document.getElementById('toggle-chart-btn');
+
+            let faceInputs = [];
+            let currentCalculation = null;
+            let isCumulativeView = false;
+            
+            function updateUIText() {
+                const calcType = calculationTypeSelect.value;
+                const typeText = calcType === 'product' ? 'prodotto' : 'somma';
+                chartTitle.textContent = `Distribuzione della ${typeText.charAt(0).toUpperCase() + typeText.slice(1)}`;
+                resultCalcTypeText.textContent = typeText;
+
+                const numValues = parseInt(numValuesInput.value);
+                const numDice = parseInt(numDiceSelect.value);
+                if (calcType === 'product') {
+                    targetInput.max = Math.pow(numValues, numDice);
+                } else { // sum
+                    targetInput.max = numValues * numDice;
+                }
+            }
+
+            function generateConfigInputs() {
+                const numFaces = parseInt(numFacesSelect.value);
+                const numValues = parseInt(numValuesInput.value) || 1;
+                
+                if (numValues < 1 || numValues > 10) return;
+
+                numFacesText.textContent = numFaces;
+                numFacesTotal.textContent = numFaces;
+
+                diceConfigContainer.innerHTML = '';
+                
+                const baseCount = Math.floor(numFaces / numValues);
+                let remainder = numFaces % numValues;
+                
+                for (let i = 1; i <= numValues; i++) {
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center justify-between';
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = `faces-for-${i}`;
+                    label.className = 'font-medium text-gray-700';
+                    label.textContent = `Facce con valore ${i}:`;
+                    
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.id = `faces-for-${i}`;
+                    input.className = 'face-config-input w-20 p-2 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500';
+                    input.min = '0';
+                    input.max = numFaces;
+                    let value = baseCount;
+                    if (remainder > 0) {
+                        value++;
+                        remainder--;
+                    }
+                    input.value = value;
+                    
+                    div.appendChild(label);
+                    div.appendChild(input);
+                    diceConfigContainer.appendChild(div);
+                }
+
+                faceInputs = document.querySelectorAll('.face-config-input');
+                faceInputs.forEach(input => input.addEventListener('input', validateFaces));
+                updateUIText();
+                validateFaces();
+            }
+
+            function greatestCommonDivisor(a, b) {
+                return b === 0 ? a : greatestCommonDivisor(b, a % b);
+            }
+
+            function validateFaces() {
+                const numFaces = parseInt(numFacesSelect.value);
+                let total = 0;
+                faceInputs.forEach(input => {
+                    total += parseInt(input.value) || 0;
+                });
+
+                facesTotalFeedback.textContent = `Totale facce assegnate: ${total} / ${numFaces}`;
+
+                if (total === numFaces) {
+                    facesTotalFeedback.className = 'mt-4 text-center font-medium p-2 rounded-md bg-green-100 text-green-800';
+                    calculateBtn.disabled = false;
+                } else {
+                    facesTotalFeedback.className = 'mt-4 text-center font-medium p-2 rounded-md bg-red-100 text-red-800';
+                    calculateBtn.disabled = true;
+                }
+            }
+            
+            function calculateAllOutcomes() {
+                const numDice = parseInt(numDiceSelect.value);
+                const numFaces = parseInt(numFacesSelect.value);
+                const dieFaces = [];
+                faceInputs.forEach((input, index) => {
+                    const value = index + 1;
+                    const count = parseInt(input.value) || 0;
+                    for (let i = 0; i < count; i++) {
+                        dieFaces.push(value);
+                    }
+                });
+
+                if (dieFaces.length !== numFaces) {
+                    console.error("Configurazione dei dadi non valida.");
+                    return null;
+                }
+
+                const productCounts = {};
+                const sumCounts = {};
+                const totalOutcomes = Math.pow(numFaces, numDice);
+
+                function findOutcomes(diceRemaining, currentProduct, currentSum) {
+                    if (diceRemaining === 0) {
+                        productCounts[currentProduct] = (productCounts[currentProduct] || 0) + 1;
+                        sumCounts[currentSum] = (sumCounts[currentSum] || 0) + 1;
+                        return;
+                    }
+                    for (const face of dieFaces) {
+                        findOutcomes(diceRemaining - 1, currentProduct * face, currentSum + face);
+                    }
+                }
+
+                findOutcomes(numDice, 1, 0);
+                
+                return { productCounts, sumCounts, totalOutcomes };
+            }
+
+            function handleCalculation() {
+                calculateBtn.disabled = true;
+                calculateBtnText.textContent = 'Calcolando...';
+                calculateLoader.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    currentCalculation = calculateAllOutcomes();
+                    
+                    if (!currentCalculation) {
+                        calculateBtn.disabled = false;
+                        calculateBtnText.textContent = 'Calcola';
+                        calculateLoader.classList.add('hidden');
+                        return;
+                    }
+
+                    const { productCounts, sumCounts, totalOutcomes } = currentCalculation;
+                    const targetValue = parseInt(targetInput.value);
+                    const comparison = comparisonType.value;
+                    const calcType = calculationTypeSelect.value;
+                    const countsToUse = calcType === 'product' ? productCounts : sumCounts;
+                    
+                    updateUIText();
+
+                    let favorableOutcomes = 0;
+                    if (comparison === 'equal') {
+                        favorableOutcomes = countsToUse[targetValue] || 0;
+                        resultComparisonText.textContent = `di`;
+                    } else { // less-than
+                        favorableOutcomes = Object.keys(countsToUse).reduce((sum, val) => {
+                            if (Number(val) < targetValue) {
+                                return sum + countsToUse[val];
+                            }
+                            return sum;
+                        }, 0);
+                        resultComparisonText.textContent = `minore di`;
+                    }
+                    
+                    const probability = totalOutcomes > 0 ? favorableOutcomes / totalOutcomes : 0;
+                    
+                    resultDisplay.classList.remove('hidden');
+                    resultTargetValue.textContent = targetValue;
+                    resultProbability.textContent = `${(probability * 100).toFixed(4)}%`;
+                    
+                    const gcd = greatestCommonDivisor(favorableOutcomes, totalOutcomes);
+                    resultDetails.textContent = `${favorableOutcomes.toLocaleString()} / ${totalOutcomes.toLocaleString()} esiti (${favorableOutcomes/gcd}/${totalOutcomes/gcd})`;
+
+                    isCumulativeView = false;
+                    toggleChartBtn.classList.remove('hidden');
+                    renderChart();
+
+                    calculateBtn.disabled = false;
+                    calculateBtnText.textContent = 'Calcola';
+                    calculateLoader.classList.add('hidden');
+                }, 10);
+            }
+
+            function renderChart() {
+                if (!currentCalculation) return;
+                
+                const calcType = calculationTypeSelect.value;
+                const counts = calcType === 'product' ? currentCalculation.productCounts : currentCalculation.sumCounts;
+                const labelName = calcType === 'product' ? 'Prodotto' : 'Somma';
+
+                if (isCumulativeView) {
+                    chartTitle.textContent = `Distribuzione Cumulativa della ${labelName}`;
+                    toggleChartBtn.textContent = 'Mostra Distribuzione';
+                    updateCumulativeChart(counts, currentCalculation.totalOutcomes, labelName);
+                } else {
+                    chartTitle.textContent = `Distribuzione della ${labelName}`;
+                    toggleChartBtn.textContent = 'Mostra Cumulativa';
+                    updateDistributionChart(counts, currentCalculation.totalOutcomes, labelName);
+                }
+            }
+
+            function updateDistributionChart(counts, totalOutcomes, labelName) {
+                distributionChart.innerHTML = '';
+                chartPlaceholder.classList.add('hidden');
+                
+                const values = Object.values(counts);
+                if (values.length === 0) {
+                    chartPlaceholder.classList.remove('hidden'); return;
+                }
+                const maxFrequency = Math.max(...values);
+                const sortedKeys = Object.keys(counts).map(Number).sort((a, b) => a - b);
+
+                for (const key of sortedKeys) {
+                    const count = counts[key];
+                    const probability = count / totalOutcomes;
+                    const barHeight = (count / maxFrequency) * 100;
+                    
+                    const barContainer = document.createElement('div');
+                    barContainer.className = 'h-64 flex flex-col items-center justify-end w-10';
+
+                    const probabilityText = document.createElement('div');
+                    probabilityText.className = 'text-xs text-gray-600 font-medium mb-1';
+                    probabilityText.textContent = `${(probability * 100).toFixed(1)}%`;
+                    
+                    const bar = document.createElement('div');
+                    bar.className = 'chart-bar w-full bg-blue-500 hover:bg-blue-400 rounded-t-md cursor-pointer';
+                    bar.style.height = `${barHeight}%`;
+                    bar.title = `${labelName}: ${key} | Esiti: ${count.toLocaleString()}`;
+
+                    const label = document.createElement('div');
+                    label.className = 'text-sm font-bold mt-1 text-gray-700';
+                    label.textContent = key;
+                    
+                    barContainer.appendChild(probabilityText);
+                    barContainer.appendChild(bar);
+                    barContainer.appendChild(label);
+                    distributionChart.appendChild(barContainer);
+                }
+            }
+            
+            function updateCumulativeChart(counts, totalOutcomes, labelName) {
+                distributionChart.innerHTML = '';
+                chartPlaceholder.classList.add('hidden');
+
+                if (totalOutcomes === 0) {
+                     chartPlaceholder.classList.remove('hidden'); return;
+                }
+
+                const sortedKeys = Object.keys(counts).map(Number).sort((a, b) => a - b);
+                let cumulativeCount = 0;
+
+                for (const key of sortedKeys) {
+                    cumulativeCount += counts[key];
+                    const cumulativeProb = cumulativeCount / totalOutcomes;
+                    const barHeight = cumulativeProb * 100;
+
+                    const barContainer = document.createElement('div');
+                    barContainer.className = 'h-64 flex flex-col items-center justify-end w-10';
+
+                    const probabilityText = document.createElement('div');
+                    probabilityText.className = 'text-xs text-gray-600 font-medium mb-1';
+                    probabilityText.textContent = `${(cumulativeProb * 100).toFixed(0)}%`;
+                    
+                    const bar = document.createElement('div');
+                    bar.className = 'chart-bar w-full bg-green-500 hover:bg-green-400 rounded-t-md cursor-pointer';
+                    bar.style.height = `${barHeight}%`;
+                    bar.title = `P(${labelName} <= ${key}) = ${(cumulativeProb * 100).toFixed(2)}%`;
+
+                    const label = document.createElement('div');
+                    label.className = 'text-sm font-bold mt-1 text-gray-700';
+                    label.textContent = key;
+                    
+                    barContainer.appendChild(probabilityText);
+                    barContainer.appendChild(bar);
+                    barContainer.appendChild(label);
+                    distributionChart.appendChild(barContainer);
+                }
+            }
+
+            // Event Listeners
+            [numDiceSelect, numFacesSelect, numValuesInput, calculationTypeSelect].forEach(el => {
+                el.addEventListener('change', generateConfigInputs);
+            });
+            calculateBtn.addEventListener('click', handleCalculation);
+            toggleChartBtn.addEventListener('click', () => {
+                isCumulativeView = !isCumulativeView;
+                renderChart();
+            });
+
+            // Initial setup
+            generateConfigInputs();
+        });
+    </script>
+</body>
+</html>
