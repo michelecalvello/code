@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Precipitazioni Orarie · Open-Meteo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Georgia', serif;
+  background: #0d1b2a;
+  color: #dce9f5;
+  min-height: 100vh;
+  padding: 36px 32px;
+}
+
+header {
+  border-bottom: 1px solid #1c3a58;
+  padding-bottom: 18px;
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #4da8da;
+  margin-bottom: 6px;
+}
+
+h1 {
+  font-size: clamp(26px, 4vw, 42px);
+  font-weight: normal;
+  font-style: italic;
+  color: #eaf4ff;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #3a6080;
+  margin-top: 5px;
+  letter-spacing: 0.05em;
+}
+
+.form-card {
+  background: rgba(255,255,255,0.035);
+  border: 1px solid #1c3a58;
+  border-radius: 8px;
+  padding: 24px 22px;
+  margin-bottom: 28px;
+}
+
+.form-section-title {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #3a6080;
+  margin-bottom: 14px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+
+label {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #4a6a85;
+  letter-spacing: 0.08em;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"] {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid #1c3a58;
+  border-radius: 5px;
+  color: #eaf4ff;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+input:focus { border-color: #2a7ab8; }
+input::placeholder { color: #2a4a62; }
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
+
+.form-divider { border: none; border-top: 1px solid #1c3a58; margin: 20px 0; }
+
+.presets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.preset-label {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #2a4a62;
+}
+
+.preset-btn {
+  background: transparent;
+  border: 1px solid #1c3a58;
+  color: #4a6a85;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.preset-btn:hover { border-color: #2a5a82; color: #7abadf; }
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+button.btn-primary {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 10px 22px;
+  transition: all 0.15s;
+  border: 1px solid #2a7ab8;
+  background: #1a4e78;
+  color: #eaf4ff;
+}
+button.btn-primary:hover { background: #2a5e88; }
+button.btn-primary:active { transform: scale(0.98); }
+button.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+button.btn-ghost {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 10px 22px;
+  border: 1px solid #1c3a58;
+  background: transparent;
+  color: #4a6a85;
+  transition: all 0.15s;
+}
+button.btn-ghost:hover { border-color: #2a5a82; color: #6a8fa8; }
+
+.validation-msg {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #e07050;
+  display: none;
+}
+
+#status {
+  text-align: center;
+  padding: 50px 0;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #4a6a85;
+  letter-spacing: 0.1em;
+  display: none;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid #1c3a58;
+  border-top-color: #4da8da;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#error-msg {
+  display: none;
+  background: rgba(216,90,48,0.1);
+  border: 1px solid #6a2a10;
+  border-radius: 6px;
+  padding: 14px 18px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #f0956a;
+  margin-bottom: 24px;
+}
+
+#results { display: none; }
+
+.results-header {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #3a6080;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #1c3a58;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.kpi {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid #1c3a58;
+  border-radius: 6px;
+  padding: 14px 13px;
+}
+
+.kpi-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: #eaf4ff;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.kpi-unit {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #3a6080;
+  margin-left: 3px;
+}
+.kpi-label {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: #4a6a85;
+  margin-top: 5px;
+  letter-spacing: 0.05em;
+}
+
+.chart-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid #1c3a58;
+  border-radius: 6px;
+  padding: 20px 18px 14px;
+  margin-bottom: 16px;
+}
+
+.chart-title {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: #3a6080;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.chart-wrap { position: relative; width: 100%; height: 220px; }
+
+.legend {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.leg-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #4a6a85;
+}
+
+.leg-swatch { width: 22px; height: 3px; border-radius: 2px; flex-shrink: 0; }
+.leg-bar    { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+
+footer {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: #1c3a58;
+  letter-spacing: 0.06em;
+  margin-top: 8px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Forecast API · Open-Meteo</div>
+  <h1>Precipitazioni Orarie</h1>
+  <div class="subtitle">Probabilità di precipitazione + Quantità (mm) · Fuso orario: Europe/Rome</div>
+</header>
+
+<div class="form-card">
+  <div class="form-section-title">Posizione</div>
+  <div class="form-row">
+    <div class="field">
+      <label for="lat">Latitudine</label>
+      <input type="number" id="lat" placeholder="es. 40.8518" step="0.0001" min="-90" max="90">
+    </div>
+    <div class="field">
+      <label for="lon">Longitudine</label>
+      <input type="number" id="lon" placeholder="es. 14.2681" step="0.0001" min="-180" max="180">
+    </div>
+    <div class="field">
+      <label for="place-name">Nome luogo (opzionale)</label>
+      <input type="text" id="place-name" placeholder="es. Napoli">
+    </div>
+  </div>
+  <div class="presets">
+    <span class="preset-label">Preset →</span>
+    <button class="preset-btn" onclick="setLocation(40.8518,14.2681,'Napoli')">Napoli</button>
+    <button class="preset-btn" onclick="setLocation(40.7677,14.7958,'Fisciano')">Fisciano</button>
+    <button class="preset-btn" onclick="setLocation(40.6824,14.7681,'Salerno')">Salerno</button>
+    <button class="preset-btn" onclick="setLocation(40.6340,14.6026,'Amalfi')">Amalfi</button>
+    <button class="preset-btn" onclick="setLocation(40.6263,14.3757,'Sorrento')">Sorrento</button>
+    <button class="preset-btn" onclick="setLocation(40.6947,15.9080,'Vaglio')">Vaglio</button>
+  </div>
+
+  <hr class="form-divider">
+
+  <div class="form-section-title">Periodo</div>
+  <div class="form-row">
+    <div class="field">
+      <label for="date-from">Da</label>
+      <input type="date" id="date-from">
+    </div>
+    <div class="field">
+      <label for="date-to">A</label>
+      <input type="date" id="date-to">
+    </div>
+  </div>
+  <div class="presets">
+    <span class="preset-label">Rapidi →</span>
+    <button class="preset-btn" onclick="setFutureDays(1)">1 g</button>
+    <button class="preset-btn" onclick="setFutureDays(2)">2 g</button>
+    <button class="preset-btn" onclick="setFutureDays(3)">3 g</button>
+    <button class="preset-btn" onclick="setFutureDays(7)">7 g</button>
+    <button class="preset-btn" onclick="setFutureDays(14)">14 g</button>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-primary" id="btn-load" onclick="loadData()">Carica dati →</button>
+    <button class="btn-ghost" onclick="resetForm()">Reset</button>
+    <span class="validation-msg" id="val-msg"></span>
+  </div>
+</div>
+
+<div id="status"><span class="spinner"></span><span id="status-text">Recupero dati…</span></div>
+<div id="error-msg"></div>
+
+<div id="results">
+  <div class="results-header" id="results-title">—</div>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div><span class="kpi-value" id="k-total">—</span><span class="kpi-unit">mm</span></div><div class="kpi-label">Precipitazione totale</div></div>
+    <div class="kpi"><div><span class="kpi-value" id="k-hours">—</span><span class="kpi-unit">ore</span></div><div class="kpi-label">Ore con pioggia (&gt;0 mm)</div></div>
+    <div class="kpi"><div><span class="kpi-value" id="k-max-mm">—</span><span class="kpi-unit">mm/h</span></div><div class="kpi-label">Picco orario</div></div>
+    <div class="kpi"><div><span class="kpi-value" id="k-max-prob">—</span><span class="kpi-unit">%</span></div><div class="kpi-label">Prob. massima</div></div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Precipitazione oraria (mm)</div>
+    <div class="chart-wrap">
+      <canvas id="chartMm" role="img" aria-label="Precipitazione oraria in mm">Dati precipitazione oraria.</canvas>
+    </div>
+    <div class="legend">
+      <div class="leg-item"><span class="leg-bar" style="background:rgba(55,138,221,0.8)"></span>Precipitazione (mm/h)</div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Probabilità di precipitazione (%)</div>
+    <div class="chart-wrap">
+      <canvas id="chartProb" role="img" aria-label="Probabilità di precipitazione oraria">Dati probabilità precipitazione.</canvas>
+    </div>
+    <div class="legend">
+      <div class="leg-item"><span class="leg-swatch" style="background:#a78bfa"></span>Probabilità precipitazione (%)</div>
+    </div>
+  </div>
+
+  <footer id="footer-info">—</footer>
+</div>
+
+<script>
+let chartMm   = null;
+let chartProb = null;
+
+// Returns today's date in Italy (Europe/Rome) as yyyy-mm-dd string
+function todayItaly() {
+  return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
+}
+
+// Adds n days to a yyyy-mm-dd string
+function addDays(dateStr, n) {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  return d.toISOString().split('T')[0];
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  setLocation(40.8518, 14.2681, 'Napoli');
+  setFutureDays(3);
+});
+
+function setLocation(lat, lon, name) {
+  document.getElementById('lat').value        = lat;
+  document.getElementById('lon').value        = lon;
+  document.getElementById('place-name').value = name || '';
+}
+
+// Presets: from today to today+n
+function setFutureDays(n) {
+  const from = todayItaly();
+  const to   = addDays(from, n);
+  document.getElementById('date-from').value = from;
+  document.getElementById('date-to').value   = to;
+}
+
+function resetForm() {
+  ['lat','lon','place-name','date-from','date-to'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('results').style.display   = 'none';
+  document.getElementById('error-msg').style.display = 'none';
+  hideVal();
+}
+
+function showVal(msg) {
+  const el = document.getElementById('val-msg');
+  el.textContent   = msg;
+  el.style.display = 'inline';
+}
+function hideVal() { document.getElementById('val-msg').style.display = 'none'; }
+
+async function loadData() {
+  hideVal();
+
+  const lat  = parseFloat(document.getElementById('lat').value);
+  const lon  = parseFloat(document.getElementById('lon').value);
+  const from = document.getElementById('date-from').value;
+  const to   = document.getElementById('date-to').value;
+  const name = document.getElementById('place-name').value.trim()
+    || `${lat.toFixed(4)}°N ${lon.toFixed(4)}°E`;
+
+  if (isNaN(lat) || isNaN(lon))  return showVal('Inserisci latitudine e longitudine.');
+  if (lat < -90  || lat > 90)    return showVal('Latitudine fuori range (−90 / +90).');
+  if (lon < -180 || lon > 180)   return showVal('Longitudine fuori range (−180 / +180).');
+  if (!from || !to)               return showVal('Seleziona entrambe le date.');
+  if (from > to)                  return showVal('La data iniziale è successiva alla finale.');
+
+  const diffDays = (new Date(to) - new Date(from)) / 86400000;
+  if (diffDays > 16) return showVal('La Forecast API supporta al massimo 16 giorni futuri.');
+  if (diffDays < 1)  return showVal('Seleziona almeno 1 giorno.');
+
+  const btn = document.getElementById('btn-load');
+  btn.disabled = true;
+  document.getElementById('results').style.display   = 'none';
+  document.getElementById('error-msg').style.display = 'none';
+  document.getElementById('status').style.display    = 'block';
+  document.getElementById('status-text').textContent = `Recupero dati orari per ${name}…`;
+
+  const url = 'https://api.open-meteo.com/v1/forecast'
+    + `?latitude=${lat}&longitude=${lon}`
+    + `&hourly=precipitation,precipitation_probability`
+    + `&start_date=${from}&end_date=${to}`
+    + `&timezone=Europe%2FRome`;
+
+  let json;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    json = await res.json();
+    if (json.error) throw new Error(json.reason || 'Errore API');
+  } catch(e) {
+    document.getElementById('status').style.display = 'none';
+    const err = document.getElementById('error-msg');
+    err.style.display = 'block';
+    err.textContent = `Errore: ${e.message}`;
+    btn.disabled = false;
+    return;
+  }
+
+  btn.disabled = false;
+  document.getElementById('status').style.display = 'none';
+  renderResults(json, name, from, to, lat, lon);
+}
+
+function renderResults(json, name, from, to, lat, lon) {
+  const times  = json.hourly.time;
+  const precip = json.hourly.precipitation.map(v => v ?? 0);
+  const prob   = json.hourly.precipitation_probability.map(v => v ?? 0);
+
+  // KPIs
+  const total   = precip.reduce((a,b) => a+b, 0);
+  const wetHrs  = precip.filter(v => v > 0).length;
+  const maxMm   = Math.max(...precip);
+  const maxProb = Math.max(...prob);
+
+  document.getElementById('k-total').textContent    = total.toFixed(1);
+  document.getElementById('k-hours').textContent    = wetHrs;
+  document.getElementById('k-max-mm').textContent   = maxMm.toFixed(1);
+  document.getElementById('k-max-prob').textContent = maxProb.toFixed(0);
+
+  const n         = times.length;
+  const skipEvery = n <= 24 ? 2 : n <= 72 ? 6 : n <= 168 ? 12 : 24;
+
+  // Format labels in Italy timezone
+  const labels = times.map(t => {
+    const d = new Date(t);
+    const day = d.toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', timeZone:'Europe/Rome' });
+    const hr  = d.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit', timeZone:'Europe/Rome' });
+    return `${day} ${hr}`;
+  });
+
+  const fmtTitle = (t) => {
+    const d = new Date(t);
+    return d.toLocaleDateString('it-IT', {
+      weekday:'short', day:'2-digit', month:'short', timeZone:'Europe/Rome'
+    }) + ' ' + d.toLocaleTimeString('it-IT', {
+      hour:'2-digit', minute:'2-digit', timeZone:'Europe/Rome'
+    });
+  };
+
+  const commonX = {
+    grid: { display: false },
+    ticks: {
+      autoSkip: false,
+      maxRotation: 45,
+      font: { family:'Courier New', size:10 },
+      color: '#3a6080',
+      callback: function(val, i) {
+        return i % skipEvery === 0 ? this.getLabelForValue(val) : '';
+      }
+    },
+    border: { color: '#1c3a58' }
+  };
+
+  const commonTooltip = {
+    backgroundColor: '#0a1622',
+    borderColor: '#2a5a82',
+    borderWidth: 1,
+    titleColor: '#eaf4ff',
+    bodyColor: '#6a8fa8',
+    titleFont: { family:'Courier New', size:12 },
+    bodyFont:  { family:'Courier New', size:11 },
+    padding: 10,
+  };
+
+  if (chartMm)   { chartMm.destroy();   chartMm   = null; }
+  if (chartProb) { chartProb.destroy(); chartProb = null; }
+
+  // Chart 1 — mm
+  chartMm = new Chart(document.getElementById('chartMm'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Precipitazione (mm/h)',
+        data: precip,
+        backgroundColor: precip.map(v => v === 0
+          ? 'rgba(55,138,221,0.12)'
+          : 'rgba(55,138,221,0.82)'
+        ),
+        borderRadius: 2,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...commonTooltip,
+          callbacks: {
+            title: (items) => fmtTitle(times[items[0].dataIndex]),
+            label: (item)  => `  ${precip[item.dataIndex].toFixed(2)} mm/h`
+          }
+        }
+      },
+      scales: {
+        x: commonX,
+        y: {
+          grid: { color: 'rgba(28,58,88,0.5)' },
+          border: { color:'#1c3a58', dash:[4,4] },
+          ticks: { font:{ family:'Courier New', size:10 }, color:'#3a6080' },
+          title: { display:true, text:'mm/h', color:'#3a6080', font:{ family:'Courier New', size:10 } },
+          beginAtZero: true
+        }
+      }
+    }
+  });
+
+  // Chart 2 — probability
+  chartProb = new Chart(document.getElementById('chartProb'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Probabilità (%)',
+        data: prob,
+        borderColor: '#a78bfa',
+        backgroundColor: 'rgba(167,139,250,0.10)',
+        borderWidth: 2,
+        pointRadius: n <= 48 ? 3 : 0,
+        pointHoverRadius: 5,
+        pointBackgroundColor: '#a78bfa',
+        tension: 0.3,
+        fill: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...commonTooltip,
+          callbacks: {
+            title: (items) => fmtTitle(times[items[0].dataIndex]),
+            label: (item)  => `  ${prob[item.dataIndex].toFixed(0)}% probabilità`
+          }
+        }
+      },
+      scales: {
+        x: commonX,
+        y: {
+          grid: { color: 'rgba(28,58,88,0.5)' },
+          border: { color:'#1c3a58', dash:[4,4] },
+          ticks: {
+            font:{ family:'Courier New', size:10 },
+            color:'#3a6080',
+            callback: v => v + '%'
+          },
+          title: { display:true, text:'%', color:'#3a6080', font:{ family:'Courier New', size:10 } },
+          min: 0,
+          max: 100,
+        }
+      }
+    }
+  });
+
+  const fmtShort = (s) => new Date(s).toLocaleDateString('it-IT',
+    { day:'2-digit', month:'short', year:'numeric', timeZone:'Europe/Rome' });
+
+  document.getElementById('results-title').textContent =
+    `${name.toUpperCase()} · ${fmtShort(from)} — ${fmtShort(to)} · ${n} ore`;
+
+  document.getElementById('footer-info').textContent =
+    `Fonte: Open-Meteo Forecast API · api.open-meteo.com/v1/forecast`
+    + ` · Fuso orario: Europe/Rome · ${lat}°N ${lon}°E`
+    + ` · Generato il ${new Date().toLocaleDateString('it-IT', { timeZone:'Europe/Rome' })}`;
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+</script>
+</body>
+</html>
