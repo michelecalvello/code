@@ -10,14 +10,14 @@
 
 body {
   font-family: 'Georgia', serif;
-  background: #0d1b2a;
-  color: #dce9f5;
+  background: #f4f6f9;
+  color: #1a2a3a;
   min-height: 100vh;
   padding: 36px 32px;
 }
 
 header {
-  border-bottom: 1px solid #1c3a58;
+  border-bottom: 1px solid #d0dae6;
   padding-bottom: 18px;
   margin-bottom: 28px;
 }
@@ -27,7 +27,7 @@ header {
   font-size: 11px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #4da8da;
+  color: #1a6eaa;
   margin-bottom: 6px;
 }
 
@@ -35,21 +35,21 @@ h1 {
   font-size: clamp(26px, 4vw, 42px);
   font-weight: normal;
   font-style: italic;
-  color: #eaf4ff;
+  color: #0d1f30;
   letter-spacing: -0.02em;
 }
 
 .subtitle {
   font-family: 'Courier New', monospace;
   font-size: 11px;
-  color: #3a6080;
+  color: #6a88a0;
   margin-top: 5px;
   letter-spacing: 0.05em;
 }
 
 .form-card {
-  background: rgba(255,255,255,0.035);
-  border: 1px solid #1c3a58;
+  background: #ffffff;
+  border: 1px solid #d0dae6;
   border-radius: 8px;
   padding: 24px 22px;
   margin-bottom: 28px;
@@ -60,7 +60,7 @@ h1 {
   font-size: 10px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #3a6080;
+  color: #6a88a0;
   margin-bottom: 14px;
 }
 
@@ -83,10 +83,10 @@ label {
 input[type="text"],
 input[type="number"],
 input[type="date"] {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid #1c3a58;
+  background: #f8fafc;
+  border: 1px solid #c8d6e2;
   border-radius: 5px;
-  color: #eaf4ff;
+  color: #1a2a3a;
   font-family: 'Courier New', monospace;
   font-size: 13px;
   padding: 9px 12px;
@@ -95,10 +95,10 @@ input[type="date"] {
   width: 100%;
 }
 input:focus { border-color: #2a7ab8; }
-input::placeholder { color: #2a4a62; }
-input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
+input::placeholder { color: #a0b8cc; }
+input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
 
-.form-divider { border: none; border-top: 1px solid #1c3a58; margin: 20px 0; }
+.form-divider { border: none; border-top: 1px solid #d0dae6; margin: 20px 0; }
 
 .presets {
   display: flex;
@@ -110,13 +110,13 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
 .preset-label {
   font-family: 'Courier New', monospace;
   font-size: 11px;
-  color: #2a4a62;
+  color: #a0b8cc;
 }
 
 .preset-btn {
-  background: transparent;
-  border: 1px solid #1c3a58;
-  color: #4a6a85;
+  background: #f0f5fa;
+  border: 1px solid #c8d6e2;
+  color: #3a6080;
   font-family: 'Courier New', monospace;
   font-size: 11px;
   padding: 5px 12px;
@@ -124,7 +124,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
   cursor: pointer;
   transition: all 0.15s;
 }
-.preset-btn:hover { border-color: #2a5a82; color: #7abadf; }
+.preset-btn:hover { background: #e0ecf6; border-color: #2a7ab8; color: #1a5080; }
 
 .btn-row {
   display: flex;
@@ -143,10 +143,10 @@ button.btn-primary {
   padding: 10px 22px;
   transition: all 0.15s;
   border: 1px solid #2a7ab8;
-  background: #1a4e78;
-  color: #eaf4ff;
+  background: #1a6eaa;
+  color: #ffffff;
 }
-button.btn-primary:hover { background: #2a5e88; }
+button.btn-primary:hover { background: #1a5e9a; }
 button.btn-primary:active { transform: scale(0.98); }
 button.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
@@ -157,17 +157,17 @@ button.btn-ghost {
   cursor: pointer;
   border-radius: 5px;
   padding: 10px 22px;
-  border: 1px solid #1c3a58;
+  border: 1px solid #c8d6e2;
   background: transparent;
-  color: #4a6a85;
+  color: #6a88a0;
   transition: all 0.15s;
 }
-button.btn-ghost:hover { border-color: #2a5a82; color: #6a8fa8; }
+button.btn-ghost:hover { border-color: #2a7ab8; color: #1a5080; }
 
 .validation-msg {
   font-family: 'Courier New', monospace;
   font-size: 11px;
-  color: #e07050;
+  color: #c0402a;
   display: none;
 }
 
@@ -176,7 +176,7 @@ button.btn-ghost:hover { border-color: #2a5a82; color: #6a8fa8; }
   padding: 50px 0;
   font-family: 'Courier New', monospace;
   font-size: 13px;
-  color: #4a6a85;
+  color: #6a88a0;
   letter-spacing: 0.1em;
   display: none;
 }
@@ -184,8 +184,8 @@ button.btn-ghost:hover { border-color: #2a5a82; color: #6a8fa8; }
 .spinner {
   display: inline-block;
   width: 16px; height: 16px;
-  border: 2px solid #1c3a58;
-  border-top-color: #4da8da;
+  border: 2px solid #d0dae6;
+  border-top-color: #1a6eaa;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   vertical-align: middle;
@@ -195,13 +195,13 @@ button.btn-ghost:hover { border-color: #2a5a82; color: #6a8fa8; }
 
 #error-msg {
   display: none;
-  background: rgba(216,90,48,0.1);
-  border: 1px solid #6a2a10;
+  background: #fff3f0;
+  border: 1px solid #f0a898;
   border-radius: 6px;
   padding: 14px 18px;
   font-family: 'Courier New', monospace;
   font-size: 12px;
-  color: #f0956a;
+  color: #c0402a;
   margin-bottom: 24px;
 }
 
@@ -210,12 +210,12 @@ button.btn-ghost:hover { border-color: #2a5a82; color: #6a8fa8; }
 .results-header {
   font-family: 'Courier New', monospace;
   font-size: 11px;
-  color: #3a6080;
+  color: #6a88a0;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   margin-bottom: 20px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #1c3a58;
+  border-bottom: 1px solid #d0dae6;
 }
 
 .kpi-grid {
@@ -226,8 +226,8 @@ button.btn-ghost:hover { border-color: #2a5a82; color: #6a8fa8; }
 }
 
 .kpi {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid #1c3a58;
+  background: #ffffff;
+  border: 1px solid #d0dae6;
   border-radius: 6px;
   padding: 14px 13px;
 }
@@ -235,27 +235,27 @@ button.btn-ghost:hover { border-color: #2a5a82; color: #6a8fa8; }
 .kpi-value {
   font-size: 26px;
   font-weight: 700;
-  color: #eaf4ff;
+  color: #0d1f30;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
 .kpi-unit {
   font-family: 'Courier New', monospace;
   font-size: 11px;
-  color: #3a6080;
+  color: #6a88a0;
   margin-left: 3px;
 }
 .kpi-label {
   font-family: 'Courier New', monospace;
   font-size: 10px;
-  color: #4a6a85;
+  color: #6a88a0;
   margin-top: 5px;
   letter-spacing: 0.05em;
 }
 
 .chart-card {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid #1c3a58;
+  background: #ffffff;
+  border: 1px solid #d0dae6;
   border-radius: 6px;
   padding: 20px 18px 14px;
   margin-bottom: 16px;
@@ -264,7 +264,7 @@ button.btn-ghost:hover { border-color: #2a5a82; color: #6a8fa8; }
 .chart-title {
   font-family: 'Courier New', monospace;
   font-size: 10px;
-  color: #3a6080;
+  color: #6a88a0;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   margin-bottom: 14px;
@@ -285,7 +285,7 @@ button.btn-ghost:hover { border-color: #2a5a82; color: #6a8fa8; }
   gap: 7px;
   font-family: 'Courier New', monospace;
   font-size: 11px;
-  color: #4a6a85;
+  color: #6a88a0;
 }
 
 .leg-swatch { width: 22px; height: 3px; border-radius: 2px; flex-shrink: 0; }
@@ -294,7 +294,7 @@ button.btn-ghost:hover { border-color: #2a5a82; color: #6a8fa8; }
 footer {
   font-family: 'Courier New', monospace;
   font-size: 10px;
-  color: #1c3a58;
+  color: #a0b8cc;
   letter-spacing: 0.06em;
   margin-top: 8px;
 }
@@ -349,10 +349,12 @@ footer {
   </div>
   <div class="presets">
     <span class="preset-label">Rapidi →</span>
-    <button class="preset-btn" onclick="setFutureDays(1)">1 g</button>
     <button class="preset-btn" onclick="setFutureDays(2)">2 g</button>
     <button class="preset-btn" onclick="setFutureDays(3)">3 g</button>
+    <button class="preset-btn" onclick="setFutureDays(4)">4 g</button>
+    <button class="preset-btn" onclick="setFutureDays(5)">5 g</button>
     <button class="preset-btn" onclick="setFutureDays(7)">7 g</button>
+    <button class="preset-btn" onclick="setFutureDays(10)">10 g</button>
     <button class="preset-btn" onclick="setFutureDays(14)">14 g</button>
   </div>
 
@@ -545,20 +547,20 @@ function renderResults(json, name, from, to, lat, lon) {
       autoSkip: false,
       maxRotation: 45,
       font: { family:'Courier New', size:10 },
-      color: '#3a6080',
+      color: '#6a88a0',
       callback: function(val, i) {
         return i % skipEvery === 0 ? this.getLabelForValue(val) : '';
       }
     },
-    border: { color: '#1c3a58' }
+    border: { color: '#d0dae6' }
   };
 
   const commonTooltip = {
-    backgroundColor: '#0a1622',
-    borderColor: '#2a5a82',
+    backgroundColor: '#ffffff',
+    borderColor: '#c8d6e2',
     borderWidth: 1,
-    titleColor: '#eaf4ff',
-    bodyColor: '#6a8fa8',
+    titleColor: '#0d1f30',
+    bodyColor: '#3a6080',
     titleFont: { family:'Courier New', size:12 },
     bodyFont:  { family:'Courier New', size:11 },
     padding: 10,
@@ -599,10 +601,10 @@ function renderResults(json, name, from, to, lat, lon) {
       scales: {
         x: commonX,
         y: {
-          grid: { color: 'rgba(28,58,88,0.5)' },
-          border: { color:'#1c3a58', dash:[4,4] },
-          ticks: { font:{ family:'Courier New', size:10 }, color:'#3a6080' },
-          title: { display:true, text:'mm/h', color:'#3a6080', font:{ family:'Courier New', size:10 } },
+          grid: { color: 'rgba(200,214,226,0.6)' },
+          border: { color:'#d0dae6', dash:[4,4] },
+          ticks: { font:{ family:'Courier New', size:10 }, color:'#6a88a0' },
+          title: { display:true, text:'mm/h', color:'#6a88a0', font:{ family:'Courier New', size:10 } },
           beginAtZero: true
         }
       }
@@ -643,14 +645,14 @@ function renderResults(json, name, from, to, lat, lon) {
       scales: {
         x: commonX,
         y: {
-          grid: { color: 'rgba(28,58,88,0.5)' },
-          border: { color:'#1c3a58', dash:[4,4] },
+          grid: { color: 'rgba(200,214,226,0.6)' },
+          border: { color:'#d0dae6', dash:[4,4] },
           ticks: {
             font:{ family:'Courier New', size:10 },
-            color:'#3a6080',
+            color:'#6a88a0',
             callback: v => v + '%'
           },
-          title: { display:true, text:'%', color:'#3a6080', font:{ family:'Courier New', size:10 } },
+          title: { display:true, text:'%', color:'#6a88a0', font:{ family:'Courier New', size:10 } },
           min: 0,
           max: 100,
         }
