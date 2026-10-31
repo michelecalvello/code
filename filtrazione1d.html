@@ -67,59 +67,6 @@ th{font-family:var(--f-body);font-weight:600;color:var(--muted);font-size:11px}
 </header>
 
 <div class="panel">
-  <div class="timebar">
-    <button id="play" class="primary" type="button">▶ Avvia</button>
-    <span class="tnow" id="tnow">t = 0.00 h</span>
-    <input type="range" id="tslider" min="0" max="0" value="0" aria-label="Tempo">
-    <label class="chk">Velocità <select id="speed" style="width:auto"><option value="6">lenta</option><option value="14" selected>media</option><option value="30">rapida</option></select></label>
-  </div>
-  <div class="stats" id="stats"></div>
-  <div id="busy" class="busy" hidden>Calcolo in corso…</div>
-</div>
-
-<div class="grid">
-  <div class="panel">
-    <h2>Sezione del pendio · vettori velocità di filtrazione</h2>
-    <svg id="slope" viewBox="0 0 560 600" role="img" aria-label="Sezione del pendio con vettori di filtrazione"></svg>
-    <div class="controls" style="margin-top:8px">
-      <label class="chk"><input type="checkbox" id="showComp" checked> Componenti parallela/normale</label>
-      <label class="chk">Scala frecce <select id="arrScale" style="width:auto"><option value="lin" selected>lineare</option><option value="log">logaritmica</option></select></label>
-      <label class="chk">Lunghezza freccia per K<sub>s</sub> <input type="range" id="arrLen" min="40" max="260" value="125" style="width:100px"></label>
-    </div>
-    <div class="legend">
-      <span><i class="sw" style="background:var(--water)"></i>vettore q</span>
-      <span><i class="sw" style="background:var(--para)"></i>q<sub>∥</sub> = K(ψ)·sinβ</span>
-      <span><i class="sw" style="background:var(--norm)"></i>q<sub>n</sub> = K(ψ)(cosβ − ∂ψ/∂n)</span>
-    </div>
-  </div>
-
-  <div class="panel">
-    <h2>Profili lungo la verticale all'istante corrente</h2>
-    <svg id="profiles" viewBox="0 0 560 330" role="img" aria-label="Profili di suzione, contenuto d'acqua e flusso"></svg>
-    <div class="legend">
-      <span><i class="sw" style="background:var(--muted);opacity:.5"></i>t = 0</span>
-      <span><i class="sw" style="border-top:2px dashed var(--muted);height:0;background:none"></i>t finale</span>
-      <span><i class="sw" style="background:var(--water)"></i>istante corrente</span>
-    </div>
-    <h2 style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-      <span>Evoluzione nel tempo alle 11 profondità</span>
-      <select id="tsVar" style="width:auto">
-        <option value="s">suzione s [kPa]</option><option value="th">contenuto d'acqua θ</option>
-        <option value="qm">|q| / K<sub>s</sub></option><option value="qn">q_n / K_s</option><option value="qx">q_∥ / K_s</option>
-      </select>
-    </h2>
-    <svg id="ts" viewBox="0 0 560 240" role="img" aria-label="Serie temporali"></svg>
-    <div class="legend" id="tsLegend"></div>
-  </div>
-</div>
-
-<div class="panel">
-  <h2>Valori lungo il profilo verticale</h2>
-  <div class="tablewrap"><table id="tab"></table></div>
-  <p class="note">z: profondità verticale; n = z·cosβ: profondità normale al pendio. q<sub>∥</sub> positivo verso valle, q<sub>n</sub> positivo verso l'interno del pendio. Angolo α<sub>h</sub>: inclinazione del vettore q sotto l'orizzontale (direzione di valle).</p>
-</div>
-
-<div class="panel">
   <h2>Parametri del caso</h2>
   <div class="params">
     <label><span>Inclinazione <b>β</b> [°]</span><input type="number" id="p_beta" value="30" step="1" min="0" max="60"></label>
@@ -140,6 +87,60 @@ th{font-family:var(--f-body);font-weight:600;color:var(--muted);font-size:11px}
     <span class="note" id="massnote" style="margin:0"></span>
   </div>
 </div>
+
+<div class="panel">
+  <div class="timebar">
+    <button id="play" class="primary" type="button">▶ Avvia</button>
+    <span class="tnow" id="tnow">t = 0.00 h</span>
+    <input type="range" id="tslider" min="0" max="0" value="0" aria-label="Tempo">
+    <label class="chk">Velocità <select id="speed" style="width:auto"><option value="6">lenta</option><option value="14" selected>media</option><option value="30">rapida</option></select></label>
+  </div>
+  <div class="stats" id="stats"></div>
+  <div id="busy" class="busy" hidden>Calcolo in corso…</div>
+</div>
+
+<div class="grid">
+  <div class="panel">
+    <h2>Sezione del pendio · vettori velocità di filtrazione</h2>
+    <svg id="slope" viewBox="0 0 700 430" role="img" aria-label="Sezione del pendio con vettori di filtrazione"></svg>
+    <div class="controls" style="margin-top:8px">
+      <label class="chk"><input type="checkbox" id="showComp" checked> Componenti parallela/normale</label>
+      <label class="chk">Scala frecce <select id="arrScale" style="width:auto"><option value="lin" selected>lineare</option><option value="log">logaritmica</option></select></label>
+      <label class="chk">Lunghezza freccia per K<sub>s</sub> <input type="range" id="arrLen" min="40" max="300" value="150" style="width:100px"></label>
+    </div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--water)"></i>vettore q</span>
+      <span><i class="sw" style="background:var(--para)"></i>q<sub>∥</sub> = K(ψ)·sinβ</span>
+      <span><i class="sw" style="background:var(--norm)"></i>q<sub>n</sub> = K(ψ)(cosβ − ∂ψ/∂n)</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Profili lungo la verticale all'istante corrente</h2>
+    <svg id="profiles" viewBox="0 0 560 250" role="img" aria-label="Profili di suzione, contenuto d'acqua e flusso"></svg>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--muted);opacity:.5"></i>t = 0</span>
+      <span><i class="sw" style="border-top:2px dashed var(--muted);height:0;background:none"></i>t finale</span>
+      <span><i class="sw" style="background:var(--water)"></i>istante corrente</span>
+    </div>
+    <h2 style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+      <span>Evoluzione nel tempo alle 11 profondità</span>
+      <select id="tsVar" style="width:auto">
+        <option value="s">suzione s [kPa]</option><option value="th">contenuto d'acqua θ</option>
+        <option value="qm">|q| / K<sub>s</sub></option><option value="qn">q_n / K_s</option><option value="qx">q_∥ / K_s</option>
+      </select>
+    </h2>
+    <svg id="ts" viewBox="0 0 560 190" role="img" aria-label="Serie temporali"></svg>
+    <div class="legend" id="tsLegend"></div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Valori lungo il profilo verticale</h2>
+  <div class="tablewrap"><table id="tab"></table></div>
+  <p class="note">z: profondità verticale; n = z·cosβ: profondità normale al pendio. q<sub>∥</sub> positivo verso valle, q<sub>n</sub> positivo verso l'interno del pendio. Angolo α<sub>h</sub>: inclinazione del vettore q sotto l'orizzontale (direzione di valle).</p>
+</div>
+
 </div>
 
 <script id="solverSrc">
@@ -306,8 +307,8 @@ let slopeDyn = null, gradStops = [];
 function drawStatic(){
   const s = $('slope'); clear(s);
   const b = P.beta*Math.PI/180, tb = Math.tan(b), cb = Math.cos(b), sb = Math.sin(b);
-  SL.k = 440/(P.Lv + 25*tb); SL.ox = 175; SL.oy = 80;
-  const Xa = -SL.ox/SL.k + 4, Xb = (560 - SL.ox)/SL.k - 4;
+  SL.k = 300/(P.Lv + 8*tb); SL.ox = 260; SL.oy = 66;
+  const Xa = -SL.ox/SL.k + 4, Xb = (700 - SL.ox)/SL.k - 4;
   const g = X => -X*tb, base = X => -X*tb - P.Lv;
   const defs = el('defs', {}, s);
   const grad = el('linearGradient', {id:'thg', gradientUnits:'userSpaceOnUse'}, defs);
@@ -365,7 +366,7 @@ function drawStatic(){
   // freccia di scala
   slopeDyn = el('g', {}, s);
   // colorbar
-  const cbg = el('g', {}, s), cbx = 20, cby = 560, cbw = 160;
+  const cbg = el('g', {}, s), cbx = 20, cby = 398, cbw = 160;
   for(let j=0;j<40;j++){ el('rect', {x:cbx + j*cbw/40, y:cby, width:cbw/40+0.5, height:9, fill: thColor(P.thr + (P.ths-P.thr)*j/39)}, cbg); }
   const c1 = el('text', {x:cbx, y:cby+22, 'font-size':10, 'font-family':'var(--f-mono)'}, cbg); c1.textContent = `θr ${P.thr.toFixed(2)}`;
   const c2 = el('text', {x:cbx+cbw, y:cby+22, 'font-size':10, 'text-anchor':'end', 'font-family':'var(--f-mono)'}, cbg); c2.textContent = `θs ${P.ths.toFixed(2)}`;
@@ -414,7 +415,7 @@ function renderSlope(){
   });
   // freccia di scala
   const ref = P.rainRatio*P.Ks, Lr = arrowLen(ref);
-  const sx = 330, sy = 40;
+  const sx = 440, sy = 34;
   arrow(slopeDyn, sx, sy, Lr, 0, W, 2.4, 9);
   const t = el('text', {x:sx, y:sy-8, 'font-size':10, fill:css('--muted')}, slopeDyn);
   t.textContent = `q di pioggia = ${(P.rainRatio).toFixed(2)} Ks = ${(ref*10).toFixed(1)} mm/h`;
@@ -449,7 +450,7 @@ function profPath(k, fn, x0, y0, w, h, xmin, xmax){
 }
 function renderProfiles(){
   const s = $('profiles'); clear(s);
-  const y0 = 42, h = 270, gap = 22, x0 = 46, w = (560 - x0 - 2*gap - 10)/3;
+  const y0 = 42, h = 196, gap = 22, x0 = 46, w = (560 - x0 - 2*gap - 10)/3;
   const last = R.t.length - 1, W = css('--water'), M = css('--muted');
   // asse z
   const az = el('g', {class:'axis'}, s);
@@ -486,7 +487,7 @@ function renderProfiles(){
   });
 }
 
-const TS = {x0:46, y0:16, w:500, h:186};
+const TS = {x0:46, y0:12, w:500, h:144};
 function depthColor(j, n){
   const u = j/(n-1);
   const dark = matchMedia('(prefers-color-scheme: dark)').matches && document.documentElement.getAttribute('data-theme') !== 'light' || document.documentElement.getAttribute('data-theme') === 'dark';
