@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Pendio indefinito a due strati</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: tavola tecnica — sezione del pendio a sinistra, profili e serie temporali a destra, tabella e parametri sotto */
+:root{
+  --bg:#f3f4f2; --panel:#ffffff; --ink:#1d2428; --muted:#5d686e; --line:#d5dad8; --grid:#e7eae8;
+  --water:#1f5fa8; --para:#c2410c; --norm:#0f766e; --sky:#e9eef2; --drain:#b9b2a3;
+  --f-display:"Spectral", Georgia, serif; --f-body:"Public Sans", system-ui, sans-serif; --f-mono:"JetBrains Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#14191c; --panel:#1b2226; --ink:#e4e9ea; --muted:#98a4a9; --line:#2f3a3f; --grid:#253035;
+  --water:#6fa8f0; --para:#f08a4b; --norm:#3cc4b2; --sky:#1a2328; --drain:#5a554b; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#14191c; --panel:#1b2226; --ink:#e4e9ea; --muted:#98a4a9; --line:#2f3a3f; --grid:#253035;
+  --water:#6fa8f0; --para:#f08a4b; --norm:#3cc4b2; --sky:#1a2328; --drain:#5a554b; color-scheme:dark }
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
+.wrap{max-width:1280px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px;display:flex;flex-direction:column;gap:16px}
+header h1{font-family:var(--f-display);font-weight:600;font-size:1.9rem;line-height:1.15;margin:0;text-wrap:balance}
+header p{margin:6px 0 0;color:var(--muted);max-width:78ch}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+.panel h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px;font-weight:600}
+svg{display:block;width:100%;height:auto;font-family:var(--f-body)}
+svg text{fill:var(--ink)}
+.axis text{font-size:10px;fill:var(--muted);font-family:var(--f-mono)}
+.controls{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.timebar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.timebar input[type=range]{flex:1 1 260px;min-width:0;accent-color:var(--water)}
+button{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:4px;padding:6px 12px;cursor:pointer}
+button.primary{background:var(--water);color:var(--panel);border-color:var(--water)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--water);outline-offset:2px}
+.tnow{font-family:var(--f-mono);font-size:1.25rem;min-width:9ch}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px 16px;margin-top:10px}
+.stat .k{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.stat .v{font-family:var(--f-mono);font-size:1rem}
+label.chk{display:inline-flex;gap:6px;align-items:center;color:var(--muted);font-size:.85rem}
+select,input[type=number]{font:inherit;font-family:var(--f-mono);background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:4px 6px;width:100%}
+.params{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 14px}
+.params label{display:flex;flex-direction:column;gap:3px;font-size:.78rem;color:var(--muted)}
+.params label span b{color:var(--ink);font-weight:600}
+.tablewrap{overflow-x:auto}
+.layers{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:12px;margin-top:12px}
+fieldset.layer{border:1px solid var(--line);border-radius:6px;padding:10px 12px 12px;margin:0;min-width:0}
+fieldset.layer legend{font-size:.78rem;font-weight:600;padding:0 6px}
+fieldset.layer .params{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}
+tr.iface td{border-bottom:1px solid var(--ink)}
+table{border-collapse:collapse;width:100%;font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:12px}
+th,td{padding:4px 8px;text-align:right;border-bottom:1px solid var(--grid);white-space:nowrap}
+th{font-family:var(--f-body);font-weight:600;color:var(--muted);font-size:11px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--muted);margin-top:6px}
+.sw{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px}
+.busy{color:var(--para);font-family:var(--f-mono);font-size:.85rem}
+.note{color:var(--muted);font-size:.8rem;margin:8px 0 0}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Filtrazione nel pendio indefinito a due strati</h1>
+  <p>Equazione di Richards 1D lungo la normale al pendio, modello di van Genuchten–Mualem con parametri diversi per i due strati. Interfaccia e base sono parallele al piano campagna; la base è drenante e la pioggia è costante. Le frecce sono il vettore velocità di Darcy ogni 10 cm di profondità lungo la verticale.</p>
+</header>
+
+<div class="panel">
+  <h2>Parametri del caso</h2>
+  <div class="params">
+    <label><span>Inclinazione <b>β</b> [°]</span><input type="number" id="p_beta" value="30" step="1" min="0" max="60"></label>
+    <label><span>Pioggia normale <b>q/K<sub>s,1</sub></b> [–]</span><input type="number" id="p_rain" value="0.3" step="0.05" min="0.01"></label>
+    <label><span>Spessore verticale <b>L</b> [cm]</span><input type="number" id="p_L" value="100" step="10" min="20"></label>
+    <label><span>Interfaccia <b>z<sub>i</sub></b> [cm]</span><input type="number" id="p_zi" value="50" step="5" min="5"></label>
+    <label><span>Suzione iniziale <b>s<sub>0</sub></b> [kPa]</span><input type="number" id="p_s0" value="20" step="1" min="0.5"></label>
+    <label><span>Condizione alla base</span><select id="p_bot"><option value="seepage" selected>superficie drenante (ψ ≤ 0)</option><option value="free">drenaggio libero (gradiente unitario)</option></select></label>
+    <label><span>Durata <b>t<sub>fin</sub></b> [h]</span><input type="number" id="p_tend" value="36" step="1" min="1"></label>
+  </div>
+  <div class="layers">
+  <fieldset class="layer l1">
+    <legend>Strato 1 · superiore (da 0 a z<sub>i</sub>)</legend>
+    <div class="params">
+      <label><span><b>K<sub>s</sub></b> [m/s]</span><input type="number" id="p1_Ks" value="1e-5" step="any"></label>
+      <label><span><b>θ<sub>s</sub></b> [–]</span><input type="number" id="p1_ths" value="0.50" step="0.01"></label>
+      <label><span><b>θ<sub>r</sub></b> [–]</span><input type="number" id="p1_thr" value="0.10" step="0.01"></label>
+      <label><span><b>α</b> [1/kPa]</span><input type="number" id="p1_alpha" value="0.4" step="0.05"></label>
+      <label><span><b>n</b> [–]</span><input type="number" id="p1_n" value="1.5" step="0.05" min="1.05"></label>
+      <label><span>Connettività <b>l</b> [–]</span><input type="number" id="p1_l" value="0.5" step="0.1"></label>
+    </div>
+  </fieldset>
+  <fieldset class="layer l2">
+    <legend>Strato 2 · inferiore (da z<sub>i</sub> alla base)</legend>
+    <div class="params">
+      <label><span><b>K<sub>s</sub></b> [m/s]</span><input type="number" id="p2_Ks" value="2e-6" step="any"></label>
+      <label><span><b>θ<sub>s</sub></b> [–]</span><input type="number" id="p2_ths" value="0.45" step="0.01"></label>
+      <label><span><b>θ<sub>r</sub></b> [–]</span><input type="number" id="p2_thr" value="0.05" step="0.01"></label>
+      <label><span><b>α</b> [1/kPa]</span><input type="number" id="p2_alpha" value="0.15" step="0.05"></label>
+      <label><span><b>n</b> [–]</span><input type="number" id="p2_n" value="1.3" step="0.05" min="1.05"></label>
+      <label><span>Connettività <b>l</b> [–]</span><input type="number" id="p2_l" value="0.5" step="0.1"></label>
+    </div>
+  </fieldset>
+  </div>
+  <div class="controls" style="margin-top:12px">
+    <button id="run" class="primary" type="button">Ricalcola</button>
+    <span class="note" id="massnote" style="margin:0"></span>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="timebar">
+    <button id="play" class="primary" type="button">▶ Avvia</button>
+    <span class="tnow" id="tnow">t = 0.00 h</span>
+    <input type="range" id="tslider" min="0" max="0" value="0" aria-label="Tempo">
+    <label class="chk">Velocità <select id="speed" style="width:auto"><option value="6">lenta</option><option value="14" selected>media</option><option value="30">rapida</option></select></label>
+  </div>
+  <div class="stats" id="stats"></div>
+  <div id="busy" class="busy" hidden>Calcolo in corso…</div>
+</div>
+
+<div class="grid">
+  <div class="panel">
+    <h2>Sezione del pendio · vettori velocità di filtrazione</h2>
+    <svg id="slope" viewBox="0 0 700 430" role="img" aria-label="Sezione del pendio con vettori di filtrazione"></svg>
+    <div class="controls" style="margin-top:8px">
+      <label class="chk"><input type="checkbox" id="showComp" checked> Componenti parallela/normale</label>
+      <label class="chk">Scala frecce <select id="arrScale" style="width:auto"><option value="lin" selected>lineare</option><option value="log">logaritmica</option></select></label>
+      <label class="chk">Lunghezza freccia per K<sub>s,1</sub> <input type="range" id="arrLen" min="40" max="300" value="150" style="width:100px"></label>
+    </div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--water)"></i>vettore q</span>
+      <span><i class="sw" style="background:var(--para)"></i>q<sub>∥</sub> = K(ψ)·sinβ</span>
+      <span><i class="sw" style="background:var(--norm)"></i>q<sub>n</sub> = K(ψ)(cosβ − ∂ψ/∂n)</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Profili lungo la verticale all'istante corrente</h2>
+    <svg id="profiles" viewBox="0 0 560 250" role="img" aria-label="Profili di suzione, contenuto d'acqua e flusso"></svg>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--muted);opacity:.5"></i>t = 0</span>
+      <span><i class="sw" style="border-top:2px dashed var(--muted);height:0;background:none"></i>t finale</span>
+      <span><i class="sw" style="background:var(--water)"></i>istante corrente</span>
+    </div>
+    <h2 style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+      <span>Evoluzione nel tempo alle 11 profondità</span>
+      <select id="tsVar" style="width:auto">
+        <option value="s">suzione s [kPa]</option><option value="th">contenuto d'acqua θ</option>
+        <option value="qm">|q| / Ks,1</option><option value="qn">q_n / Ks,1</option><option value="qx">q_∥ / Ks,1</option>
+      </select>
+    </h2>
+    <svg id="ts" viewBox="0 0 560 190" role="img" aria-label="Serie temporali"></svg>
+    <div class="legend" id="tsLegend"></div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Valori lungo il profilo verticale</h2>
+  <div class="tablewrap"><table id="tab"></table></div>
+  <p class="note">z: profondità verticale; n = z·cosβ: profondità normale al pendio. s negativa indica pressione dell'acqua positiva (falda sospesa). Nel punto sull'interfaccia K, θ e q<sub>∥</sub> sono quelli del lato dello strato 1 (q<sub>n</sub> è continuo). q<sub>∥</sub> positivo verso valle, q<sub>n</sub> positivo verso l'interno del pendio. Angolo α<sub>h</sub>: inclinazione del vettore q sotto l'orizzontale (direzione di valle).</p>
+</div>
+
+</div>
+
+<script id="solverSrc">
+function makeVG(p){
+  // van Genuchten–Mualem; hs facoltativo (Vogel et al., 2001), di default 0 = modello classico.
+  const m = 1 - 1/p.n, hs = p.hs === undefined ? 0 : p.hs;
+  const raw = h => Math.pow(1 + Math.pow(-p.alpha*h, p.n), -m);
+  const Sc = hs < 0 ? raw(hs) : 1;
+  const F = x => Math.pow(1 - Math.pow(x, 1/m), m), F1 = 1 - F(Sc);
+  const Se = h => h >= hs ? 1 : raw(h)/Sc;
+  const theta = h => p.thr + (p.ths - p.thr)*Se(h);
+  const K = h => { if (h >= hs) return p.Ks; const s = Se(h); const a = (1 - F(s*Sc))/F1; return p.Ks*Math.pow(s, p.l)*a*a; };
+  const C = h => { if (h >= hs) return 0; const x = -p.alpha*h; return (p.ths - p.thr)/Sc*p.alpha*m*p.n*Math.pow(x, p.n - 1)*Math.pow(1 + Math.pow(x, p.n), -m - 1); };
+  return {Se, theta, K, C, m, p};
+}
+// Due strati: strato 1 da n = 0 all'interfaccia, strato 2 dall'interfaccia alla base. L'interfaccia cade su un nodo.
+function simulate(P){
+  const M1 = makeVG(P.L1), M2 = makeVG(P.L2);
+  const b = P.beta*Math.PI/180, cb = Math.cos(b), sb = Math.sin(b);
+  const H = P.Lv*cb, N = P.N, dz = H/N, Ss = 1e-6, qtop = P.q;
+  const Ni = Math.max(1, Math.min(N-1, Math.round(N*P.zi/P.Lv)));
+  const seg = j => j < Ni ? M1 : M2;               // materiale del tratto tra i nodi j e j+1
+  const w = i => (i===0||i===N) ? dz/2 : dz;
+  const stor = (i,h) => (i>0 ? dz/2*seg(i-1).theta(h) : 0) + (i<N ? dz/2*seg(i).theta(h) : 0);
+  const cap  = (i,h) => (i>0 ? dz/2*seg(i-1).C(h) : 0) + (i<N ? dz/2*seg(i).C(h) : 0);
+  let psi = new Float64Array(N+1).fill(P.psi0);
+  const Sk = new Float64Array(N+1), Ck = new Float64Array(N+1), Ks = new Float64Array(N);
+  const a = new Float64Array(N+1), bb = new Float64Array(N+1), c = new Float64Array(N+1), d = new Float64Array(N+1);
+  const cp = new Float64Array(N+1), dp = new Float64Array(N+1);
+  let topMode = 'flux', botMode = P.bottom === 'seepage' ? 'noflow' : 'free';
+  let t = 0, dt = 1e-4; const dtMax = 0.02;
+  const out = {t:[], psi:[], theta:[], qn:[], qin:[], qout:[], H, cb, sb, dz, N, Ni, zi: Ni*dz/cb};
+  let cumIn = 0, cumOut = 0;
+  const storeArr = arr => { const r = new Float64Array(N+1); for(let i=0;i<=N;i++) r[i]=stor(i,arr[i]); return r; };
+  const total = arr => { let s=0; for(let i=0;i<=N;i++) s += stor(i,arr[i]); return s; };
+  const S0 = total(psi);
+  const segK = (pk, j) => 0.5*(seg(j).K(pk[j]) + seg(j).K(pk[j+1]));
+  function fluxes(pk, sOld, dt, tm, bm){
+    const qi = new Float64Array(N);
+    for(let i=0;i<N;i++) qi[i] = -segK(pk,i)*((pk[i+1]-pk[i])/dz - cb);
+    const qin = (tm==='flux') ? qtop : (sOld ? qi[0] + (stor(0,pk[0])-sOld[0])/dt : qi[0]);
+    let qout;
+    if(bm==='free') qout = M2.K(pk[N])*cb; else if(bm==='noflow') qout = 0; else qout = sOld ? qi[N-1] - (stor(N,pk[N])-sOld[N])/dt : qi[N-1];
+    const qn = new Float64Array(N+1); qn[0]=qin; qn[N]=qout; for(let i=1;i<N;i++) qn[i]=0.5*(qi[i-1]+qi[i]);
+    return {qin, qout, qn};
+  }
+  function step(psiOld, dt, tm, bm){
+    const sOld = storeArr(psiOld);
+    let pk = Float64Array.from(psiOld);
+    for(let it=0; it<40; it++){
+      for(let i=0;i<=N;i++){ Sk[i]=stor(i,pk[i]); Ck[i]=cap(i,pk[i]); }
+      for(let j=0;j<N;j++) Ks[j]=segK(pk,j);
+      for(let i=0;i<=N;i++){
+        const A = (Ck[i] + Ss*w(i))/dt;
+        const Km = i>0 ? Ks[i-1] : 0, Kp = i<N ? Ks[i] : 0;
+        a[i] = i>0 ? -Km/dz : 0; c[i] = i<N ? -Kp/dz : 0;
+        bb[i] = A + (i>0?Km/dz:0) + (i<N?Kp/dz:0);
+        d[i] = A*pk[i] - (Sk[i]-sOld[i])/dt + (i>0?Km*cb:0) - (i<N?Kp*cb:0);
+        if(i===0){ if(tm==='flux') d[0] += qtop; else { c[0]=0; bb[0]=1; d[0]=0; } }
+        if(i===N){ if(bm==='free') d[N] -= M2.K(pk[N])*cb; else if(bm==='dir'){ a[N]=0; bb[N]=1; d[N]=0; } }
+      }
+      cp[0]=c[0]/bb[0]; dp[0]=d[0]/bb[0];
+      for(let i=1;i<=N;i++){ const den=bb[i]-a[i]*cp[i-1]; cp[i]=c[i]/den; dp[i]=(d[i]-a[i]*dp[i-1])/den; }
+      const pn = new Float64Array(N+1); pn[N]=dp[N];
+      for(let i=N-1;i>=0;i--) pn[i]=dp[i]-cp[i]*pn[i+1];
+      // convergenza: |Δψ| < 1e-3 cm, oppure |Δθ| < 1e-5 sui nodi non saturi e |Δψ| < 0.1 cm sui nodi saturi
+      let err=0, errTh=0, errSat=0;
+      for(let i=0;i<=N;i++){
+        const e=Math.abs(pn[i]-pk[i]); if(e>err) err=e;
+        if(pn[i] >= 0 || pk[i] >= 0){ if(e>errSat) errSat=e; }
+        else { const eT = Math.abs(stor(i,pn[i]) - Sk[i])/w(i); if(eT>errTh) errTh=eT; }
+      }
+      if(it >= 8){ for(let i=0;i<=N;i++) pn[i] = 0.5*(pn[i]+pk[i]); }  // rilassamento: smorza le oscillazioni a 2 cicli vicino a ψ = 0
+      pk = pn;
+      if(!isFinite(err)) return null;
+      if(err < 1e-3 || (errTh < 1e-5 && errSat < 0.1)){ const f = fluxes(pk, sOld, dt, tm, bm); return {psi:pk, iters:it+1, ...f}; }
+    }
+    return null;
+  }
+  let last = fluxes(psi, null, 1, topMode, botMode);
+  const record = () => {
+    const th = new Float32Array(N+1); for(let i=0;i<=N;i++) th[i] = stor(i,psi[i])/w(i);
+    out.t.push(t); out.psi.push(Float32Array.from(psi)); out.theta.push(th); out.qn.push(Float32Array.from(last.qn)); out.qin.push(last.qin); out.qout.push(last.qout);
+  };
+  let nextOut = 0; record(); nextOut += P.dtOut;
+  let guard = 0;
+  while(t < P.tEnd - 1e-9 && guard++ < 2e6){
+    const h = Math.min(dt, nextOut - t);
+    let r = step(psi, h, topMode, botMode);
+    if(!r){ dt = Math.max(dt*0.3, 1e-8); continue; }
+    let tm=topMode, bm=botMode;
+    if(tm==='flux' && r.psi[0] > 0) tm='dir'; else if(tm==='dir' && r.qin > qtop) tm='flux';
+    if(P.bottom==='seepage'){ if(bm==='noflow' && r.psi[N] > 0) bm='dir'; else if(bm==='dir' && r.qout < 0) bm='noflow'; }
+    if(tm!==topMode || bm!==botMode){ topMode=tm; botMode=bm; r = step(psi, h, topMode, botMode); if(!r){ dt=Math.max(dt*0.3,1e-8); continue; } }
+    psi = r.psi; t += h; cumIn += r.qin*h; cumOut += r.qout*h; last = r;
+    if(r.iters <= 4) dt = Math.min(dt*1.3, dtMax); else if(r.iters > 12) dt *= 0.7;
+    if(Math.abs(t - nextOut) < 1e-9){ record(); nextOut += P.dtOut; }
+  }
+  out.massErr = (total(psi) - S0) - (cumIn - cumOut);
+  out.cumIn = cumIn; out.cumOut = cumOut;
+  return out;
+}
+
+</script>
+
+<script>
+const $ = id => document.getElementById(id);
+const NS = 'http://www.w3.org/2000/svg';
+const GW = 0.0981; // kPa per cm di colonna d'acqua
+let R = null, P = null, VG1 = null, VG2 = null, frame = 0, playing = false, timer = null;
+const DEPTHS = []; // profondità verticali [cm]
+
+function readParams(){
+  const num = id => parseFloat($(id).value);
+  const lay = k => ({Ks: num(`p${k}_Ks`)*360000, ths: num(`p${k}_ths`), thr: num(`p${k}_thr`), alpha: num(`p${k}_alpha`)*GW, n: num(`p${k}_n`), l: num(`p${k}_l`)});
+  const L1 = lay(1), L2 = lay(2), Lv = num('p_L'), ratio = num('p_rain');
+  return {
+    beta: num('p_beta'), rainRatio: ratio, Lv, zi: num('p_zi'), L1, L2,
+    q: ratio*L1.Ks, Ks: L1.Ks, ths: Math.max(L1.ths, L2.ths), thr: Math.min(L1.thr, L2.thr),
+    psi0: -num('p_s0')/GW, bottom: $('p_bot').value, tEnd: num('p_tend'),
+    dtOut: Math.max(1/12, num('p_tend')/240), N: 200
+  };
+}
+
+function css(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function el(tag, attrs, parent){ const e = document.createElementNS(NS, tag); for(const k in attrs) e.setAttribute(k, attrs[k]); if(parent) parent.appendChild(e); return e; }
+function clear(s){ while(s.firstChild) s.removeChild(s.firstChild); }
+
+// ---- run (in worker, con ripiego sul thread principale)
+function run(){
+  P = readParams();
+  const okL = L => L.ths > L.thr && L.n > 1 && L.Ks > 0 && L.alpha > 0;
+  if(!okL(P.L1) || !okL(P.L2) || P.beta < 0 || P.beta >= 89 || !(P.zi > 0 && P.zi < P.Lv)){ $('massnote').textContent = 'Parametri non validi: in ogni strato servono θs > θr, n > 1, Ks > 0, α > 0; inoltre 0 ≤ β < 89° e 0 < zi < L.'; return; }
+  VG1 = makeVG(P.L1); VG2 = makeVG(P.L2);
+  DEPTHS.length = 0; for(let z=0; z<=P.Lv+1e-9; z+=10) DEPTHS.push(z);
+  if(DEPTHS[DEPTHS.length-1] < P.Lv - 1e-9) DEPTHS.push(P.Lv);
+  stop(); $('busy').hidden = false; $('run').disabled = true;
+  const done = res => { R = res; $('busy').hidden = true; $('run').disabled = false; afterRun(); };
+  try{
+    const src = $('solverSrc').textContent + '\nonmessage=e=>{const o=simulate(e.data);postMessage(o);};';
+    const w = new Worker(URL.createObjectURL(new Blob([src], {type:'text/javascript'})));
+    w.onmessage = e => { done(e.data); w.terminate(); };
+    w.onerror = () => { w.terminate(); setTimeout(() => done(simulate(P)), 20); };
+    w.postMessage(P);
+  }catch(err){ setTimeout(() => done(simulate(P)), 20); }
+}
+
+function afterRun(){
+  $('tslider').max = R.t.length - 1;
+  // valori derivati
+  const nT = R.t.length;
+  R.pts = []; // per frame: array di oggetti alle profondità
+  let qmax = 0;
+  for(let k=0;k<nT;k++){
+    const arr = DEPTHS.map(z => sample(k, z));
+    arr.forEach(p => { qmax = Math.max(qmax, Math.abs(p.qx), Math.abs(p.qn)); });
+    R.pts.push(arr);
+  }
+  R.qmax = qmax;
+  const rel = R.massErr / Math.max(1e-9, R.cumIn);
+  $('massnote').textContent = `Bilancio di massa: errore ${(R.massErr*10).toFixed(3)} mm su ${(R.cumIn*10).toFixed(0)} mm infiltrati (${(rel*100).toExponential(1)} %).`;
+  frame = 0; drawStatic(); render();
+}
+
+function sample(k, zv){
+  const n = zv*R.cb, x = n/R.dz, i = Math.min(R.N-1, Math.floor(x)), f = x - i;
+  const ps = R.psi[k][i]*(1-f) + R.psi[k][i+1]*f;
+  const qn = R.qn[k][i]*(1-f) + R.qn[k][i+1]*f;
+  const lay = zv <= R.zi + 1e-6 ? 1 : 2, M = lay === 1 ? VG1 : VG2;
+  const th = M.theta(ps), K = M.K(ps);
+  return {zv, n, lay, iface: Math.abs(zv - R.zi) < 1e-6, psi:ps, s: -ps*GW, th, Se: M.Se(ps), K, qx: K*R.sb, qn};
+}
+
+function matNode(i, side){ return i < R.Ni ? VG1 : i > R.Ni ? VG2 : (side === 'dn' ? VG2 : VG1); }
+
+// ---- colori θ: da sabbia asciutta a blu saturo
+function thColor(th){
+  const u = Math.max(0, Math.min(1, (th - P.thr)/(P.ths - P.thr)));
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark' || (document.documentElement.getAttribute('data-theme') !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+  const A = dark ? [92,78,58] : [226,206,160], B = dark ? [40,90,150] : [40,92,160], M = dark ? [70,100,95] : [150,170,150];
+  const lerp = (p,q,t)=>p.map((v,j)=>Math.round(v+(q[j]-v)*t));
+  const c = u < 0.5 ? lerp(A, M, u*2) : lerp(M, B, (u-0.5)*2);
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+
+// ---- sezione del pendio
+const SL = {k:3, ox:200, oy:95};
+function toScr(X, Y){ return [SL.ox + X*SL.k, SL.oy - Y*SL.k]; }
+let slopeDyn = null, gradStops = [];
+function drawStatic(){
+  const s = $('slope'); clear(s);
+  const b = P.beta*Math.PI/180, tb = Math.tan(b), cb = Math.cos(b), sb = Math.sin(b);
+  SL.k = 300/(P.Lv + 8*tb); SL.ox = 260; SL.oy = 66;
+  const Xa = -SL.ox/SL.k + 4, Xb = (700 - SL.ox)/SL.k - 4;
+  const g = X => -X*tb, base = X => -X*tb - P.Lv;
+  const defs = el('defs', {}, s);
+  const grad = el('linearGradient', {id:'thg', gradientUnits:'userSpaceOnUse'}, defs);
+  const [x1,y1] = toScr(0,0), [x2,y2] = toScr(-sb*R.H, -cb*R.H);
+  grad.setAttribute('x1',x1); grad.setAttribute('y1',y1); grad.setAttribute('x2',x2); grad.setAttribute('y2',y2);
+  gradStops = [];
+  for(let j=0;j<=40;j++){ gradStops.push(el('stop', {offset: j/40}, grad)); }
+  const pat = el('pattern', {id:'grav', width:8, height:8, patternUnits:'userSpaceOnUse'}, defs);
+  el('rect', {width:8, height:8, fill:css('--drain')}, pat);
+  el('circle', {cx:2, cy:2, r:1.3, fill:css('--muted'), opacity:.6}, pat);
+  el('circle', {cx:6, cy:6, r:1.1, fill:css('--muted'), opacity:.6}, pat);
+  // cielo
+  const sky = [toScr(Xa, g(Xa)), toScr(Xb, g(Xb)), toScr(Xb, 60), toScr(Xa, 60)];
+  el('polygon', {points: sky.map(p=>p.join(',')).join(' '), fill: css('--sky')}, s);
+  // pioggia (verticale)
+  const rain = el('g', {stroke: css('--water'), 'stroke-width':1, opacity:.45}, s);
+  for(let X = Xa+3; X < Xb; X += 7){
+    const top = g(X) + 6 + ((X*13)%11+11)%11, len = 6;
+    const [ax,ay] = toScr(X, top + len), [bx,by] = toScr(X, top);
+    if(ay < 4) continue;
+    el('line', {x1:ax, y1:Math.max(4,ay), x2:bx, y2:by}, rain);
+  }
+  // terreno
+  const soil = [toScr(Xa, g(Xa)), toScr(Xb, g(Xb)), toScr(Xb, base(Xb)), toScr(Xa, base(Xa))];
+  el('polygon', {points: soil.map(p=>p.join(',')).join(' '), fill:'url(#thg)'}, s);
+  // strato drenante
+  const dl = 7;
+  const drn = [toScr(Xa, base(Xa)), toScr(Xb, base(Xb)), toScr(Xb, base(Xb)-dl/cb), toScr(Xa, base(Xa)-dl/cb)];
+  el('polygon', {points: drn.map(p=>p.join(',')).join(' '), fill:'url(#grav)'}, s);
+  el('line', {x1:soil[0][0], y1:soil[0][1], x2:soil[1][0], y2:soil[1][1], stroke:css('--ink'), 'stroke-width':1.5}, s);
+  el('line', {x1:soil[3][0], y1:soil[3][1], x2:soil[2][0], y2:soil[2][1], stroke:css('--ink'), 'stroke-width':1, 'stroke-dasharray':'5 3'}, s);
+  // interfaccia tra gli strati
+  const zi = R.zi, ifc = X => -X*tb - zi;
+  const [i1x,i1y] = toScr(Xa, ifc(Xa)), [i2x,i2y] = toScr(Xb, ifc(Xb));
+  el('line', {x1:i1x, y1:i1y, x2:i2x, y2:i2y, stroke:css('--ink'), 'stroke-width':1.2, 'stroke-dasharray':'8 3 2 3'}, s);
+  const labL = (X, Yf, txt) => { const [x,y] = toScr(X, Yf(X)); const t = el('text', {x, y, 'font-size':11, 'font-weight':600, transform:`rotate(${P.beta} ${x} ${y})`, fill:css('--ink')}, s); t.textContent = txt; };
+  const Xl = Math.min(Xb - 70, 40);
+  labL(Xl, X => -X*tb - zi*0.5 + 2, 'strato 1');
+  labL(Xl, X => -X*tb - zi - (P.Lv - zi)*0.5 + 2, 'strato 2');
+  // etichette
+  const lab = (X,Y,txt,anchor,extra={}) => { const [x,y]=toScr(X,Y); const t=el('text',{x,y,'font-size':11,'text-anchor':anchor||'start',...extra},s); t.textContent=txt; return t; };
+  const [gx,gy] = toScr(Xb-80, g(Xb-80));
+  const tg = el('text', {x:gx, y:gy-8, 'font-size':11, transform:`rotate(${P.beta} ${gx} ${gy-8})`, fill:css('--muted')}, s); tg.textContent = 'piano campagna';
+  const [bx2,by2] = toScr(Xa + 3, base(Xa + 3));
+  const tb2 = el('text', {x:bx2, y:by2+19, 'font-size':11, transform:`rotate(${P.beta} ${bx2} ${by2+17})`, fill:css('--ink')}, s); tb2.textContent = P.bottom==='seepage' ? 'superficie drenante' : 'base: drenaggio libero';
+  // angolo β
+  const [ax0, ay0] = toScr(Xa+8, g(Xa+8));
+  el('line', {x1:ax0, y1:ay0, x2:ax0+70, y2:ay0, stroke:css('--muted'), 'stroke-dasharray':'3 3'}, s);
+  const r = 46, ex = ax0 + r*Math.cos(b), ey = ay0 + r*Math.sin(b);
+  el('path', {d:`M${ax0+r},${ay0} A${r},${r} 0 0 1 ${ex},${ey}`, fill:'none', stroke:css('--muted')}, s);
+  const tbt = el('text', {x:ax0+r+6, y:ay0+14, 'font-size':12, fill:css('--ink')}, s); tbt.textContent = `β = ${P.beta}°`;
+  // profilo verticale
+  const [p0x,p0y] = toScr(0,0), [p1x,p1y] = toScr(0,-P.Lv);
+  el('line', {x1:p0x, y1:p0y, x2:p1x, y2:p1y, stroke:css('--ink'), 'stroke-width':1, 'stroke-dasharray':'2 3', opacity:.7}, s);
+  DEPTHS.forEach(z => {
+    const [x,y] = toScr(0,-z);
+    el('line', {x1:x-4, y1:y, x2:x, y2:y, stroke:css('--ink')}, s);
+    const t = el('text', {x:x-8, y:y+3.5, 'font-size':10, 'text-anchor':'end', 'font-family':'var(--f-mono)', fill:css('--ink')}, s); t.textContent = z.toFixed(0);
+  });
+  const tz = el('text', {x:p0x-8, y:p0y-12, 'font-size':10, 'text-anchor':'end', fill:css('--muted')}, s); tz.textContent = 'z [cm]';
+  // spessore normale
+  const [hx,hy] = toScr(-sb*R.H*0, 0);
+  // freccia di scala
+  slopeDyn = el('g', {}, s);
+  // colorbar
+  const cbg = el('g', {}, s), cbx = 20, cby = 398, cbw = 160;
+  for(let j=0;j<40;j++){ el('rect', {x:cbx + j*cbw/40, y:cby, width:cbw/40+0.5, height:9, fill: thColor(P.thr + (P.ths-P.thr)*j/39)}, cbg); }
+  const c1 = el('text', {x:cbx, y:cby+22, 'font-size':10, 'font-family':'var(--f-mono)'}, cbg); c1.textContent = `θr ${P.thr.toFixed(2)}`;
+  const c2 = el('text', {x:cbx+cbw, y:cby+22, 'font-size':10, 'text-anchor':'end', 'font-family':'var(--f-mono)'}, cbg); c2.textContent = `θs ${P.ths.toFixed(2)}`;
+  const c3 = el('text', {x:cbx, y:cby-5, 'font-size':10, fill:css('--muted')}, cbg); c3.textContent = 'contenuto d\'acqua θ';
+}
+
+function arrowLen(q){
+  const Lks = parseFloat($('arrLen').value), mode = $('arrScale').value, a = Math.abs(q)/P.Ks;
+  if(mode === 'lin') return a*Lks;
+  if(a <= 1e-5) return 0;
+  return Math.max(0, (Math.log10(a) + 5)/5)*Lks; // 5 decadi: 1e-5 Ks → 0, Ks → Lks
+}
+function arrow(g, x, y, dx, dy, color, w, head){
+  const L = Math.hypot(dx,dy);
+  if(L < 1.2){ el('circle', {cx:x, cy:y, r:1.6, fill:color}, g); return; }
+  const ux = dx/L, uy = dy/L, hl = Math.min(head, L*0.45), hw = hl*0.5;
+  const ex = x+dx, ey = y+dy, bx = ex - ux*hl, by = ey - uy*hl;
+  el('line', {x1:x, y1:y, x2:bx, y2:by, stroke:color, 'stroke-width':w, 'stroke-linecap':'round'}, g);
+  el('polygon', {points:`${ex},${ey} ${bx - uy*hw},${by + ux*hw} ${bx + uy*hw},${by - ux*hw}`, fill:color}, g);
+}
+
+function renderSlope(){
+  const k = frame, pts = R.pts[k];
+  // gradiente θ lungo la normale
+  gradStops.forEach((st, j) => {
+    const n = R.H*j/40, x = n/R.dz, i = Math.min(R.N-1, Math.floor(x)), f = x - i;
+    const th = R.theta[k][i]*(1-f) + R.theta[k][i+1]*f;
+    st.setAttribute('stop-color', thColor(th));
+  });
+  clear(slopeDyn);
+  const comp = $('showComp').checked, b = P.beta*Math.PI/180, cb = Math.cos(b), sb = Math.sin(b);
+  const W = css('--water'), PA = css('--para'), NO = css('--norm');
+  pts.forEach(p => {
+    const [x,y] = toScr(0, -p.zv);
+    const qm = Math.hypot(p.qx, p.qn), L = arrowLen(qm);
+    // direzione in coordinate globali (X destra, Y su): q = qx·t + qn·n̂, t=(cos,-sin), n̂=(-sin,-cos)
+    const VX = p.qx*cb - p.qn*sb, VY = -p.qx*sb - p.qn*cb;
+    const m = Math.hypot(VX,VY) || 1, dx = VX/m*L, dy = -VY/m*L;
+    if(comp){
+      const Lx = arrowLen(p.qx), Ln = arrowLen(p.qn)*Math.sign(p.qn||0);
+      arrow(slopeDyn, x, y, cb*Lx, sb*Lx, PA, 1.4, 6);
+      arrow(slopeDyn, x, y, -sb*Ln, cb*Ln, NO, 1.4, 6);
+    }
+    arrow(slopeDyn, x, y, dx, dy, W, 2.4, 9);
+    el('circle', {cx:x, cy:y, r:2.2, fill:css('--ink')}, slopeDyn);
+  });
+  // freccia di scala
+  const ref = P.rainRatio*P.Ks, Lr = arrowLen(ref);
+  const sx = 440, sy = 34;
+  arrow(slopeDyn, sx, sy, Lr, 0, W, 2.4, 9);
+  const t = el('text', {x:sx, y:sy-8, 'font-size':10, fill:css('--muted')}, slopeDyn);
+  t.textContent = `q di pioggia = ${(P.rainRatio).toFixed(2)} Ks = ${(ref*10).toFixed(1)} mm/h`;
+}
+
+// ---- grafici
+function axis(g, x0, y0, w, h, xmin, xmax, ticks, fmt, title){
+  const ax = el('g', {class:'axis'}, g);
+  ticks.forEach(v => {
+    const x = x0 + (v - xmin)/(xmax - xmin)*w;
+    el('line', {x1:x, y1:y0, x2:x, y2:y0+h, stroke:css('--grid')}, ax);
+    const t = el('text', {x, y:y0-4, 'text-anchor':'middle'}, ax); t.textContent = fmt(v);
+  });
+  const tt = el('text', {x:x0 + w/2, y:y0-18, 'text-anchor':'middle', style:'font-family:var(--f-body);font-size:11px;fill:var(--ink)'}, ax); tt.textContent = title;
+  el('rect', {x:x0, y:y0, width:w, height:h, fill:'none', stroke:css('--line')}, ax);
+}
+function niceTicks(a, b, n){
+  const span = b - a, step0 = span/n, p = Math.pow(10, Math.floor(Math.log10(step0))), r = step0/p;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10)*p, out = [];
+  for(let v = Math.ceil(a/step)*step; v <= b + 1e-9; v += step) out.push(+v.toFixed(10));
+  return out;
+}
+function profPath(k, fn, x0, y0, w, h, xmin, xmax){
+  // curva continua dalla soluzione completa; all'interfaccia due punti (lato strato 1 e lato strato 2)
+  const N = R.N, pts = [], idx = [];
+  for(let i=0;i<=N;i+=2) idx.push(i);
+  if(!idx.includes(R.Ni)) idx.push(R.Ni);
+  idx.sort((a,b)=>a-b);
+  const put = (i, side) => {
+    const zv = (i*R.dz)/R.cb, v = fn(k, i, side);
+    const x = x0 + (Math.max(xmin, Math.min(xmax, v)) - xmin)/(xmax - xmin)*w, y = y0 + zv/P.Lv*h;
+    pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+  };
+  idx.forEach(i => { if(i === R.Ni){ put(i,'up'); put(i,'dn'); } else put(i); });
+  return 'M' + pts.join('L');
+}
+function renderProfiles(){
+  const s = $('profiles'); clear(s);
+  const y0 = 42, h = 196, gap = 22, x0 = 46, w = (560 - x0 - 2*gap - 10)/3;
+  const last = R.t.length - 1, W = css('--water'), M = css('--muted');
+  // asse z
+  const az = el('g', {class:'axis'}, s);
+  for(let z=0; z<=P.Lv; z+=20){ const y = y0 + z/P.Lv*h; const t = el('text', {x:x0-6, y:y+3, 'text-anchor':'end'}, az); t.textContent = z; }
+  const tz = el('text', {x:12, y:y0 + h/2, transform:`rotate(-90 12 ${y0+h/2})`, 'text-anchor':'middle', style:'font-family:var(--f-body);font-size:11px;fill:var(--ink)'}, az); tz.textContent = 'z verticale [cm]';
+  const s0 = -P.psi0*GW;
+  let smin = 0; R.psi.forEach(a => a.forEach(v => { if(-v*GW < smin) smin = -v*GW; }));
+  smin = smin < 0 ? smin*1.1 : 0;
+  const panels = [
+    {title:'suzione s [kPa]  (s < 0: pressione)', min:smin, max:s0*1.02, fn:(k,i)=>-R.psi[k][i]*GW, fmt:v=>v.toFixed(Math.abs(v)<10?1:0)},
+    {title:'contenuto d\'acqua θ', min:P.thr, max:P.ths, fn:(k,i,side)=>matNode(i,side).theta(R.psi[k][i]), fmt:v=>v.toFixed(2)},
+    {title:'flusso / Ks,1', min:Math.min(0, -0.02), max:Math.max(0.05, R.qmax/P.Ks*1.05), fn:null, fmt:v=>v.toFixed(2)}
+  ];
+  panels.forEach((pn, j) => {
+    const px = x0 + j*(w + gap);
+    axis(s, px, y0, w, h, pn.min, pn.max, niceTicks(pn.min, pn.max, 4), pn.fmt, pn.title);
+    const draw = (k, fn, color, extra) => el('path', {d: profPath(k, fn, px, y0, w, h, pn.min, pn.max), fill:'none', stroke:color, 'stroke-width':extra.w||1.8, 'stroke-dasharray':extra.dash||'', opacity:extra.op||1}, s);
+    if(j === 0 && pn.min < 0){ const zx = px + (0 - pn.min)/(pn.max - pn.min)*w; el('line', {x1:zx, y1:y0, x2:zx, y2:y0+h, stroke:css('--muted'), 'stroke-width':.8}, s); }
+    if(pn.fn){
+      draw(0, pn.fn, M, {w:1.2, op:.5}); draw(last, pn.fn, M, {w:1.2, dash:'4 3'}); draw(frame, pn.fn, W, {w:2.2});
+    } else {
+      const qxF = (k,i,side) => matNode(i,side).K(R.psi[k][i])*R.sb/P.Ks, qnF = (k,i) => R.qn[k][i]/P.Ks;
+      draw(last, qxF, css('--para'), {w:1, dash:'4 3', op:.6}); draw(last, qnF, css('--norm'), {w:1, dash:'4 3', op:.6});
+      draw(frame, qxF, css('--para'), {w:2.2}); draw(frame, qnF, css('--norm'), {w:2.2});
+      const zx = px + (0 - pn.min)/(pn.max - pn.min)*w;
+      el('line', {x1:zx, y1:y0, x2:zx, y2:y0+h, stroke:css('--muted'), 'stroke-width':.8}, s);
+      const l1 = el('text', {x:px+w-4, y:y0+h-20, 'text-anchor':'end', 'font-size':10, fill:css('--para')}, s); l1.textContent = 'q∥';
+      const l2 = el('text', {x:px+w-4, y:y0+h-7, 'text-anchor':'end', 'font-size':10, fill:css('--norm')}, s); l2.textContent = 'qn';
+    }
+    const yi = y0 + R.zi/P.Lv*h;
+    el('line', {x1:px, y1:yi, x2:px+w, y2:yi, stroke:css('--ink'), 'stroke-width':.8, 'stroke-dasharray':'6 3 2 3', opacity:.6}, s);
+    // punti campionati ogni 10 cm
+    R.pts[frame].forEach(p => {
+      const v = j===0 ? p.s : j===1 ? p.th : null;
+      if(v === null) return;
+      const x = px + (Math.max(pn.min, Math.min(pn.max, v)) - pn.min)/(pn.max - pn.min)*w, y = y0 + p.zv/P.Lv*h;
+      el('circle', {cx:x, cy:y, r:2.4, fill:W}, s);
+    });
+  });
+}
+
+const TS = {x0:46, y0:12, w:500, h:144};
+function depthColor(j, n){
+  const u = j/(n-1);
+  const dark = matchMedia('(prefers-color-scheme: dark)').matches && document.documentElement.getAttribute('data-theme') !== 'light' || document.documentElement.getAttribute('data-theme') === 'dark';
+  const L = dark ? 82 - u*40 : 72 - u*45, hue = 40 + u*170;
+  return `hsl(${hue} 60% ${L}%)`;
+}
+function renderTS(){
+  const s = $('ts'); clear(s);
+  const v = $('tsVar').value, {x0,y0,w,h} = TS, nT = R.t.length, tEnd = R.t[nT-1];
+  const get = p => v==='s' ? p.s : v==='th' ? p.th : v==='qm' ? Math.hypot(p.qx,p.qn)/P.Ks : v==='qn' ? p.qn/P.Ks : p.qx/P.Ks;
+  let ymin = Infinity, ymax = -Infinity;
+  R.pts.forEach(arr => arr.forEach(p => { const y = get(p); if(y<ymin) ymin=y; if(y>ymax) ymax=y; }));
+  if(v==='th'){ ymin = P.thr; ymax = P.ths; } else { ymin = Math.min(0, ymin); ymax = ymax + (ymax-ymin)*0.05 || 1; }
+  const X = t => x0 + t/tEnd*w, Y = y => y0 + h - (y - ymin)/(ymax - ymin)*h;
+  const ax = el('g', {class:'axis'}, s);
+  niceTicks(ymin, ymax, 4).forEach(t => { el('line', {x1:x0, y1:Y(t), x2:x0+w, y2:Y(t), stroke:css('--grid')}, ax); const tx = el('text', {x:x0-6, y:Y(t)+3, 'text-anchor':'end'}, ax); tx.textContent = (Math.abs(t)<10 ? t.toFixed(2) : t.toFixed(0)); });
+  niceTicks(0, tEnd, 6).forEach(t => { const tx = el('text', {x:X(t), y:y0+h+14, 'text-anchor':'middle'}, ax); tx.textContent = t; });
+  const tl = el('text', {x:x0+w, y:y0+h+28, 'text-anchor':'end', style:'font-family:var(--f-body);font-size:11px;fill:var(--muted)'}, ax); tl.textContent = 'tempo [h]';
+  el('rect', {x:x0, y:y0, width:w, height:h, fill:'none', stroke:css('--line')}, ax);
+  DEPTHS.forEach((z, j) => {
+    let d = '';
+    for(let k=0;k<nT;k++){ d += (k?'L':'M') + X(R.t[k]).toFixed(1) + ',' + Y(get(R.pts[k][j])).toFixed(1); }
+    el('path', {d, fill:'none', stroke:depthColor(j, DEPTHS.length), 'stroke-width':1.6}, s);
+  });
+  const cx = X(R.t[frame]);
+  el('line', {x1:cx, y1:y0, x2:cx, y2:y0+h, stroke:css('--ink'), 'stroke-width':1, 'stroke-dasharray':'3 2'}, s);
+  const hit = el('rect', {x:x0, y:y0, width:w, height:h, fill:'transparent', style:'cursor:crosshair'}, s);
+  const pick = e => { const r = s.getBoundingClientRect(), xx = (e.clientX - r.left)/r.width*560; const t = Math.max(0, Math.min(tEnd, (xx - x0)/w*tEnd)); setFrame(Math.round(t/tEnd*(nT-1))); };
+  hit.addEventListener('pointerdown', e => { pick(e); hit.setPointerCapture(e.pointerId); hit.onpointermove = pick; });
+  hit.addEventListener('pointerup', () => { hit.onpointermove = null; });
+  $('tsLegend').innerHTML = DEPTHS.map((z,j)=>`<span><i class="sw" style="background:${depthColor(j,DEPTHS.length)}"></i>${z} cm</span>`).join('');
+}
+
+function renderTable(){
+  const pts = R.pts[frame], f = (x,d) => x.toFixed(d), fe = x => Math.abs(x) < 1e-3 && x !== 0 ? x.toExponential(2) : x.toFixed(3);
+  const b = P.beta*Math.PI/180;
+  let h = '<thead><tr><th>z [cm]</th><th>strato</th><th>n [cm]</th><th>s [kPa]</th><th>θ [–]</th><th>S<sub>e</sub></th><th>K/K<sub>s</sub></th><th>q<sub>∥</sub> [mm/h]</th><th>q<sub>n</sub> [mm/h]</th><th>|q| [mm/h]</th><th>|q|/K<sub>s</sub></th><th>α<sub>h</sub> [°]</th></tr></thead><tbody>';
+  pts.forEach(p => {
+    const qm = Math.hypot(p.qx,p.qn);
+    const VX = p.qx*Math.cos(b) - p.qn*Math.sin(b), VY = -p.qx*Math.sin(b) - p.qn*Math.cos(b);
+    const ang = Math.atan2(-VY, VX)*180/Math.PI;
+    h += `<tr${p.iface ? ' class="iface"' : ''}><td>${f(p.zv,0)}</td><td>${p.iface ? '1 | int.' : p.lay}</td><td>${f(p.n,1)}</td><td>${f(p.s,2)}</td><td>${f(p.th,3)}</td><td>${f(p.Se,3)}</td><td>${fe(p.K/P.Ks)}</td><td>${fe(p.qx*10)}</td><td>${fe(p.qn*10)}</td><td>${fe(qm*10)}</td><td>${fe(qm/P.Ks)}</td><td>${qm>0?f(ang,1):'–'}</td></tr>`;
+  });
+  $('tab').innerHTML = h + '</tbody>';
+}
+
+function renderStats(){
+  const k = frame, t = R.t[k];
+  // acqua immagazzinata e fronte
+  let S = 0; for(let i=0;i<=R.N;i++) S += R.theta[k][i]*(i===0||i===R.N?R.dz/2:R.dz);
+  let S0 = 0; for(let i=0;i<=R.N;i++) S0 += R.theta[0][i]*(i===0||i===R.N?R.dz/2:R.dz);
+  const thr = 0.5*(-P.psi0); let front = null;
+  for(let i=R.N;i>=0;i--){ if(-R.psi[k][i] < thr){ front = i*R.dz/R.cb; break; } }
+  const items = [
+    ['Pioggia normale q', `${(P.rainRatio*P.Ks*10).toFixed(1)} mm/h`],
+    ['Pioggia verticale i = q/cosβ', `${(P.rainRatio*P.Ks*10/R.cb).toFixed(1)} mm/h`],
+    ['Infiltrazione', `${(R.qin[k]*10).toFixed(2)} mm/h`],
+    ['Ruscellamento', `${(Math.max(0, P.q - R.qin[k])*10).toFixed(2)} mm/h`],
+    ['Efflusso alla base', `${(R.qout[k]*10).toFixed(2)} mm/h`],
+    ['Acqua immagazzinata Δ', `${((S - S0)*10).toFixed(1)} mm`],
+    ['Fronte (s < s₀/2)', front === null ? '—' : (front >= P.Lv-0.5 ? 'alla base' : `z ≈ ${front.toFixed(0)} cm`)],
+  ];
+  $('stats').innerHTML = items.map(([a,b])=>`<div class="stat"><div class="k">${a}</div><div class="v">${b}</div></div>`).join('');
+  $('tnow').textContent = `t = ${t.toFixed(2)} h`;
+}
+
+function render(){ if(!R) return; renderSlope(); renderProfiles(); renderTS(); renderTable(); renderStats(); $('tslider').value = frame; }
+function setFrame(k){ frame = Math.max(0, Math.min(R.t.length-1, k)); render(); }
+function stop(){ playing = false; clearInterval(timer); $('play').textContent = '▶ Avvia'; }
+function play(){
+  if(!R) return;
+  if(frame >= R.t.length-1) frame = 0;
+  playing = true; $('play').textContent = '❚❚ Pausa';
+  const fps = parseInt($('speed').value);
+  clearInterval(timer);
+  timer = setInterval(() => { if(frame >= R.t.length-1){ stop(); return; } setFrame(frame+1); }, 1000/fps);
+}
+$('play').onclick = () => playing ? stop() : play();
+$('speed').onchange = () => { if(playing) play(); };
+$('tslider').oninput = e => setFrame(parseInt(e.target.value));
+$('showComp').onchange = render; $('arrScale').onchange = render; $('arrLen').oninput = render;
+$('tsVar').onchange = render;
+$('run').onclick = run;
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => { if(R){ drawStatic(); render(); } });
+new MutationObserver(() => { if(R){ drawStatic(); render(); } }).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+run();
+</script>
+
+</body>
+</html>
